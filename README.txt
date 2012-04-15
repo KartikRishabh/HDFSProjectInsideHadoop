@@ -1,3 +1,5 @@
+THIS IS FOR CPSC 438 PROJECT AND IS A NON-RELEASE FORK OF HADOOP
+
 For the latest information about Hadoop, please visit our website at:
 
    http://hadoop.apache.org/core/
