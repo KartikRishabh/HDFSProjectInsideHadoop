@@ -204,7 +204,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
   }
 
   /**
-   * Converts an IOExcpetion (not subclasses) to SocketException.
+   * Converts an IOException (not subclasses) to SocketException.
    * This is typically done to indicate to upper layers that the error 
    * was a socket error rather than often more serious exceptions like 
    * disk errors.

@@ -123,5 +123,148 @@ public class DFSUtil {
       throw new IllegalArgumentException(ue);
     }
   }
+  
+  /*
+   * @CPSC438
+   * Takes a filename and sorts it, by writing out to different files 
+   * and then merges them simultaneously
+   * Also takes a separator to indicate how to find columns, and int
+   * to indicate which column to sort. 
+   */
+  public static void mergeFile(String filename, String sep, Int col) {
+    DataInputStream fs = new DataInputStream( 
+  }
+  
+  long MIN_MEMORY = //Large Number;
+
+  public enum ColDataType {
+      STRING, INTEGER
+  };
+
+  /* 
+   * @CS438
+   * sep is the separator character, col is the column number. 
+   */
+  void sortBlock(InputStream block, String sep, int col, ColDataType type)
+  {  
+
+    long fileNum = 0;
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(block));
+  
+    ArrayList<String> lines = new ArrayList<String>();
+    long freeMemory = Runtime.freeMemory();
+  
+    int counter = 0;
+    while((inputLine = in.readLine()) != null) 
+    {
+      while((freeMemory = Runtime.freeMemory()) > MIN_MEMORY) 
+        lines.add(inputLine, counter++);    
+
+      int len = lines.size();
+      String[] lineArray = new String[len];
+      lines.toArray(lineArray);
+      InputCompare<String> comp = new InputCompare<String>(sep, col, type);
+      Arrays.sort(lineArray, comp);
+    
+      Daemon d = new Daemon(new ConcurrentSortedWriter(someFilename + fileNum++, lineArray));
+      d.start();
+      lines.clear();
+      System.gc();
+      counter = 0;
+    }
+    in.close();
+  }
+
+  public class ConcurrentSortedWriter implements Runnable{
+  
+    String filename;
+    String[] arr;
+
+    public ConcurrentSortedWriter(String filename, String[] arr) {
+      this.filename = filename;
+      this.arr = arr;
+    }
+    
+    public void run() {
+      PrintWriter out = new PrintWriter(new FileWriter(filename));
+      for(int i = 0; i < arr.length; i++)
+        out.println(arr[i]);
+      out.close();
+    }
+  }
+
+  public class InputCompare<String> implements Comparator<String> {
+  
+    String separator = ",";
+    int col = 0;
+    ColDataType type = STRING;
+  
+    public InputCompare<String>(String separator, int col, ColDataType type) {
+      this.separator = separator;
+      this.col = col;
+      this.type = type;
+    }
+
+    public int compare(String o1, String o2) {
+      String s1 = o1.split(separator)[col];
+      String s2 = o2.split(separator)[col];
+      
+      switch (type) {
+        case INTEGER:
+          return Integer.parseInt(s1).compareTo(s2);
+        case STRING:
+        default:
+          return s1.compareTo(s2);
+      }
+    }
+  
+    public boolean equals(String o1, String o2) {
+      return compare(o1, o2) == 0;
+    }
+  }
+
+  /*private void quicksort(ArrayList<Comparable> a) {
+    return quicksorthelper(a, 0, a.size()-1);
+  }
+
+  private void quicksorthelper(ArrayList<Comparable> a, int startIndex, int endIndex)
+	{
+		if(startIndex<endIndex)
+	 	{
+	 		int pivot = partition(a, startIndex, endIndex);
+	 		quicksorthelper(a, startIndex, pivot);
+	 		if(pivot!=endIndex) quicksorthelper(a, pivot+1, endIndex);
+	 	}
+	 	else
+	 	{
+	 	}
+	 }
+
+  //Postcondition:  Returns the index of the pivot element.
+  //                All elements on the left side of the pivot (from lowIndex)
+  //                are less than or equal to the pivot.
+	//                All elements on the right side of the pivot (through highIndex)
+	//                are greater than or equal to the pivot.
+	private int partition(ArrayList<Comparable> a, int lowIndex, int highIndex)
+	{
+		int pivot = lowIndex;
+		for (int unsorted = lowIndex + 1; unsorted <= highIndex; unsorted++)
+		{
+			if (a[unsorted].compareTo(a[pivot]) < 0)
+			{
+				Comparable temp = a[pivot];
+				a[pivot] = a[unsorted];
+				display.update();
+				a[unsorted] = a[pivot + 1];
+				display.update();
+				a[pivot + 1] = temp;
+				display.update();
+				pivot++;
+			}
+		}
+
+		return pivot;
+	}*/
 }
 
