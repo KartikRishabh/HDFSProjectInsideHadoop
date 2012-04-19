@@ -30,9 +30,18 @@ public class LargeFileSort {
 		long[] times = new long[10];
 
 		times[0] = System.currentTimeMillis();
-		
+	
+		String target = "";	
+		int index;
 		while ((inputLine = in.readLine()) != null) {
-			lines.add(inputLine);
+			
+			target = inputLine;	
+			for(int i = 0; i < col; i++)
+				target = target.substring(target.indexOf(sep)+1);
+			index = target.indexOf(sep);
+			if (index != -1)
+				target = target.substring(0, index);
+			lines.add(target + sep + inputLine);
 			counter++;
 			
 			if(r.freeMemory() > MIN_MEMORY)
@@ -44,7 +53,7 @@ public class LargeFileSort {
 			InputCompare<String> comp = new InputCompare<String>(sep, col, type);
 			Arrays.sort(lineArray, comp);
 			
-			ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray);
+			ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray,sep);
 			csw.start();
 			lines.clear();
 			System.gc();
@@ -63,10 +72,10 @@ public class LargeFileSort {
 		System.out.println(r.freeMemory());
 		System.out.println("Done copying");
 		InputCompare<String> comp = new InputCompare<String>(sep, col, type);
-		Arrays.sort(lineArray, comp);
+		Arrays.sort(lineArray);//, comp);
 		times[2] = System.currentTimeMillis()-times[2];
 		System.out.println("Done sorting");
-		ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray);
+		ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray, sep);
 		csw.start();
 		lines.clear();
 		for(int i = 0; i < 3; i++)
@@ -78,10 +87,12 @@ public class LargeFileSort {
 	public class ConcurrentSortedWriter extends Thread { 
 		String filename;
 		String[] arr;
+		String sep;
 		
-		public ConcurrentSortedWriter(String filename, String[] arr) {
+		public ConcurrentSortedWriter(String filename, String[] arr, String sep) {
 			this.filename = filename;
 			this.arr = arr;
+			this.sep = sep;
 		}
 
 		public void run() {
@@ -89,7 +100,7 @@ public class LargeFileSort {
 			try {
 				out = new PrintWriter(new FileWriter(filename));
 				for(int i = 0; i < arr.length; i++) {
-					out.println(arr[i]);
+					out.println(arr[i].substring(arr[i].indexOf(sep)+1));
 				}
 			}
 			catch (Exception e) {
@@ -152,6 +163,6 @@ public class LargeFileSort {
 		System.out.println(r.freeMemory());
 		LargeFileSort lfs = new LargeFileSort();
 		lfs.sortBlock(args[0], ",", Integer.parseInt(args[1]), 
-									Integer.parseInt(args[2]) > 0 ? ColDataType.INTEGER : ColDataType.STRINGS);
+		              Integer.parseInt(args[2]) > 0 ? ColDataType.INTEGER : ColDataType.STRINGS);
 	}	
 }
