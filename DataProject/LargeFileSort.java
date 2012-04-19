@@ -14,7 +14,7 @@ public class LargeFileSort {
    * sep is the separator character, col is the column number. 
    */
 	public void sortBlock(String filename, String sep, int col, ColDataType type) throws Exception { 
-  	long fileNum = System.currentTimeMillis();
+		long fileNum = System.currentTimeMillis();
 
 		Runtime r = Runtime.getRuntime();
 		long freeMemory = r.freeMemory();
@@ -24,7 +24,7 @@ public class LargeFileSort {
 		ArrayList<String> lines = new ArrayList<String>();
 		String inputLine = "";
 		
-    int counter = 0;
+		int counter = 0;
 		int len = 0;
 		
 		long[] times = new long[10];
@@ -39,16 +39,16 @@ public class LargeFileSort {
 				continue ;
 			
 			//len = lines.size();
-      String[] lineArray = new String[counter];;
-      lines.toArray(lineArray);
-      InputCompare<String> comp = new InputCompare<String>(sep, col, type);
-      Arrays.sort(lineArray, comp);
- 
-      ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray);
-      csw.start();
-      lines.clear();
-      System.gc();
-      counter = 0;
+			String[] lineArray = new String[counter];;
+			lines.toArray(lineArray);
+			InputCompare<String> comp = new InputCompare<String>(sep, col, type);
+			Arrays.sort(lineArray, comp);
+			
+			ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray);
+			csw.start();
+			lines.clear();
+			System.gc();
+			counter = 0;
 			System.out.println(freeMemory -r.freeMemory());
 		}
 		times[1] = System.currentTimeMillis();
@@ -65,7 +65,7 @@ public class LargeFileSort {
 		InputCompare<String> comp = new InputCompare<String>(sep, col, type);
 		Arrays.sort(lineArray, comp);
 		times[2] = System.currentTimeMillis()-times[2];
-    System.out.println("Done sorting");
+		System.out.println("Done sorting");
 		ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray);
 		csw.start();
 		lines.clear();
@@ -151,6 +151,7 @@ public class LargeFileSort {
 		Runtime r = Runtime.getRuntime();
 		System.out.println(r.freeMemory());
 		LargeFileSort lfs = new LargeFileSort();
-		lfs.sortBlock(args[0], ",", Integer.parseInt(args[1]), Integer.parseInt(args[2]) > 0 ? ColDataType.INTEGER : ColDataType.STRINGS);
+		lfs.sortBlock(args[0], ",", Integer.parseInt(args[1]), 
+									Integer.parseInt(args[2]) > 0 ? ColDataType.INTEGER : ColDataType.STRINGS);
 	}	
 }
