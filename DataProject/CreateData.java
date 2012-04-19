@@ -16,8 +16,8 @@ public class CreateData {
 		in.close();
 		int size = words.size();
 		
-		PrintWriter out = new PrintWriter(new FileWriter("dataset.txt"));
-		for(long i = 0; i < 100000000L; i++) {
+		PrintWriter out = new PrintWriter(new FileWriter("/home/accts/krv6/Documents/junior/project/dataset-micro.txt"));
+		for(long i = 0; i < Long.parseLong(args[0]); i++) {
 			out.println(i + "," +  (long)(10000.0*Math.random()) + "," + (long)(10000*Math.random()) + "," + words.get((int)(Math.random() * size)));
 		}
 		out.close();
