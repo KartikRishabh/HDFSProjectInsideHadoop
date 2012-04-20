@@ -72,7 +72,7 @@ public class LargeFileSort {
 		System.out.println(r.freeMemory());
 		System.out.println("Done copying");
 		InputCompare<String> comp = new InputCompare<String>(sep, col, type);
-		Arrays.sort(lineArray);//, comp);
+		Arrays.sort(lineArray, comp);
 		times[2] = System.currentTimeMillis()-times[2];
 		System.out.println("Done sorting");
 		ConcurrentSortedWriter csw = new ConcurrentSortedWriter(filename+"s"+fileNum++, lineArray, sep);
@@ -127,20 +127,9 @@ public class LargeFileSort {
 
 		public int compare(T o1, T o2) {
 			if (o1 instanceof String && o2 instanceof String) {
-				String s1 = (String)o1;
-				String s2 = (String)o2;
-				for(int i = 0; i < col; i++) {
-					s1 = s1.substring(s1.indexOf(separator)+1);
-					s2 = s2.substring(s2.indexOf(separator)+1);
-				}
-				int ind1 = s1.indexOf(separator);
-				int ind2 = s2.indexOf(separator);
-				if (ind1 != -1)
-					s1 = s1.substring(0, ind1);
-				if (ind2 != -1)
-					s2 = s2.substring(0, ind2);
-				//s1 = s1.substring(s1.lastIndexOf(separator));//split(separator)[col];
-				//s2 = s2.substring(s2.lastIndexOf(separator));//split(separator)[col];
+				String s1 = (String)o1, s2 = (String)o2;
+				s1 = s1.substring(0, s1.indexOf(separator));
+				s2 = s2.substring(0, s2.indexOf(separator));
 
 				switch (type) {
 					case INTEGER:
