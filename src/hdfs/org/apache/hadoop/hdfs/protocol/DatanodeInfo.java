@@ -78,7 +78,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     super(nodeID);
     this.capacity = 0L;
     this.dfsUsed = 0L;
-    this.remaining = 0L;isFi
+    this.remaining = 0L;
     this.lastUpdate = 0L;
     this.xceiverCount = 0;
     this.adminState = null;  
@@ -410,7 +410,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     this.xceiverCount = in.readInt();
     this.location = Text.readString(in);
     this.hostName = Text.readString(in);
-    this.sortCol = Text.readInt(in); // @CPSC438
+    this.sortCol = in.readInt(); // @CPSC438
     setAdminState(WritableUtils.readEnum(in, AdminStates.class));
   }
 }

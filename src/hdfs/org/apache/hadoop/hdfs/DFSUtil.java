@@ -18,6 +18,9 @@
 
 package org.apache.hadoop.hdfs;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -153,7 +156,7 @@ public class DFSUtil {
 		String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
 		                    column + " ";
 		                    
-		ColDataType cdt = STRING;
+		ColDataType cdt = ColDataType.STRING;
     
     BufferedReader in = null;		  
 		try {
@@ -161,14 +164,12 @@ public class DFSUtil {
 		  String inputLine = in.readLine();
 		  if(inputLine != null && 
 		     inputLine.split(",")[column].replaceAll("\\d+", "").length() > 0) {
-		      cdt = INTEGER;
+		      cdt = ColDataType.INTEGER;
 		  }
+      in.close();
 		}	catch(IOException ioe) {
 		  throw new RuntimeException(ioe);
-		} finally {
-      if (in != null)
-        in.close();
-		}
+		} 
 
 		try {		  
 		  switch (cdt) {

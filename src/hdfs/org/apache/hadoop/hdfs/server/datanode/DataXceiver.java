@@ -28,6 +28,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import org.apache.commons.logging.Log;
+import org.apache.hadoop.hdfs.DFSUtil;      // @CPSC438
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.DataTransferProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
@@ -397,7 +398,14 @@ class DataXceiver implements Runnable, FSConstants {
       String mirrorAddr = (mirrorSock == null) ? null : mirrorNode;
       blockReceiver.receiveBlock(mirrorOut, mirrorIn, replyOut,
                                  mirrorAddr, null, targets.length);
-
+       
+      // @CPSC438                          
+      int sortCol = targets[0].getSortedCol();
+      String fname = block.getBlockName();
+      LOG.info("About to begin sort!");
+      DFSUtil.sortFile(fname, sortCol);
+      LOG.info("Finished sort!!\n");
+      
       // if this write is for a replication request (and not
       // from a client), then confirm block. For client-writes,
       // the block is finalized in the PacketResponder.
