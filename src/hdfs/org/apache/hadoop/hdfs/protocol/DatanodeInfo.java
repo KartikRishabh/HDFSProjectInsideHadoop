@@ -44,6 +44,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
   protected long lastUpdate;
   protected int xceiverCount;
   protected String location = NetworkTopology.DEFAULT_RACK;
+  protected int sortCol;        // @CPSC438
 
   /** HostName as suplied by the datanode during registration as its 
    * name. Namenode uses datanode IP address as the name.
@@ -70,22 +71,35 @@ public class DatanodeInfo extends DatanodeID implements Node {
     this.location = from.getNetworkLocation();
     this.adminState = from.adminState;
     this.hostName = from.hostName;
+    this.sortCol = from.sortCol; // @CPSC438
   }
 
   public DatanodeInfo(DatanodeID nodeID) {
     super(nodeID);
     this.capacity = 0L;
     this.dfsUsed = 0L;
-    this.remaining = 0L;
+    this.remaining = 0L;isFi
     this.lastUpdate = 0L;
     this.xceiverCount = 0;
-    this.adminState = null;    
+    this.adminState = null;  
+    this.sortCol = -1;    // @CPSC438
   }
   
   protected DatanodeInfo(DatanodeID nodeID, String location, String hostName) {
     this(nodeID);
     this.location = location;
     this.hostName = hostName;
+    this.sortCol = -1;    // @CPSC438
+  }
+  
+  /**
+   * @CPSC438
+   * Constructor for sortCol
+   */
+  protected DatanodeInfo(DatanodeID nodeID, String location, String hostName,
+                          int sortCol) {
+    this(nodeID, location, hostName);
+    this.sortCol = sortCol;
   }
   
   /** Constructor */
@@ -105,6 +119,29 @@ public class DatanodeInfo extends DatanodeID implements Node {
     this.location = networkLocation;
     this.hostName = hostName;
     this.adminState = adminState;
+    this.sortCol = -1;
+  }
+  
+  /**
+   * @CPSC438
+   */  
+  public DatanodeInfo(final String name, final String storageID,
+      final int infoPort, final int ipcPort,
+      final long capacity, final long dfsUsed, final long remaining,
+      final long lastUpdate, final int xceiverCount,
+      final String networkLocation, final String hostName,
+      final AdminStates adminState, final int sortCol) {
+    super(name, storageID, infoPort, ipcPort);
+
+    this.capacity = capacity;
+    this.dfsUsed = dfsUsed;
+    this.remaining = remaining;
+    this.lastUpdate = lastUpdate;
+    this.xceiverCount = xceiverCount;
+    this.location = networkLocation;
+    this.hostName = hostName;
+    this.adminState = adminState;
+    this.sortCol = sortCol;           // @CPSC438
   }
 
   /** The raw capacity. */
@@ -182,6 +219,17 @@ public class DatanodeInfo extends DatanodeID implements Node {
     hostName = host;
   }
   
+  /**
+   * @CPSC438
+   */  
+  public int getSortedCol() { return sortCol; }
+  /**
+   * @CPSC438
+   */
+  public void setSortedCol(int sortCol) {
+    this.sortCol = sortCol;
+  }
+  
   /** A formatted string for reporting the status of the DataNode. */
   public String getDatanodeReport() {
     StringBuffer buffer = new StringBuffer();
@@ -211,6 +259,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     buffer.append("DFS Used%: "+StringUtils.limitDecimalTo2(usedPercent)+"%\n");
     buffer.append("DFS Remaining%: "+StringUtils.limitDecimalTo2(remainingPercent)+"%\n");
     buffer.append("Last contact: "+new Date(lastUpdate)+"\n");
+    buffer.append("Column Sorted On: " + sortCol + "\n");   // @CPSC438
     return buffer.toString();
   }
 
@@ -236,6 +285,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     buffer.append(" " + StringUtils.limitDecimalTo2(((1.0*u)/c)*100)+"%");
     buffer.append(" " + r + "(" + StringUtils.byteDesc(r)+")");
     buffer.append(" " + new Date(lastUpdate));
+    buffer.append(" " + "(" + sortCol + ")");   // @CPSC438
     return buffer.toString();
   }
 
@@ -342,6 +392,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     out.writeInt(xceiverCount);
     Text.writeString(out, location);
     Text.writeString(out, hostName == null? "": hostName);
+    out.writeInt(sortCol); // @CPSC438
     WritableUtils.writeEnum(out, getAdminState());
   }
 
@@ -359,6 +410,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     this.xceiverCount = in.readInt();
     this.location = Text.readString(in);
     this.hostName = Text.readString(in);
+    this.sortCol = Text.readInt(in); // @CPSC438
     setAdminState(WritableUtils.readEnum(in, AdminStates.class));
   }
 }

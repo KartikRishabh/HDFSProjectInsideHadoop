@@ -3,7 +3,7 @@ import java.io.*;
 
 public class LargeFileSort {
 
-	public static long MIN_MEMORY = 15000000;
+	public static long MIN_MEMORY = 150000000;
 	
 	public enum ColDataType {
 		INTEGER, STRINGS
@@ -58,6 +58,7 @@ public class LargeFileSort {
 			lines.clear();
 			System.gc();
 			counter = 0;
+			Thread.sleep(100);
 			System.out.println(freeMemory -r.freeMemory());
 		}
 		times[1] = System.currentTimeMillis();

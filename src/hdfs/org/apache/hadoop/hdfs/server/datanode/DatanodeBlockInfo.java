@@ -38,16 +38,32 @@ class DatanodeBlockInfo {
   private File     file;         // block file
   private boolean detached;      // copy-on-write done for block
 
+  private int sortedCol;       // @CPSC438: Column block is sorted on
+  
+  /**
+   * @CPSC438
+   * Specific construct to indicate which column block is
+   * sorted upon
+   */
+  DatanodeBlockInfo(FSVolumne vol, File file, int col) {
+    this.volume = vol;
+    this.file = file;
+    detached = false;
+    this.sortedCol = col;
+  }
+
   DatanodeBlockInfo(FSVolume vol, File file) {
     this.volume = vol;
     this.file = file;
     detached = false;
+    this.sortedCol = -1;
   }
 
   DatanodeBlockInfo(FSVolume vol) {
     this.volume = vol;
     this.file = null;
     detached = false;
+    this.sortedCol = -1;
   }
 
   FSVolume getVolume() {
@@ -70,6 +86,32 @@ class DatanodeBlockInfo {
    */
   void setDetached() {
     detached = true;
+  }
+  
+  /**
+   * @CPSC438
+   * Find which column block is sorted on
+   * return -1 if bl.ock is not explicitly sorted
+   */
+  int getSortedCol() {
+    return sortedCol;
+  }
+  
+  /**
+   * @CPSC438
+   * Indicate which column block is sorted on
+   */
+  void setSortedCol(int col) {
+    this.sortedCol = col;
+    sortFile(col);
+  }
+  
+  /**
+   * @CPSC438
+   * Calls DFSUtils sortFile
+   */
+  public void sortFile(int column) {
+    DFSUtil.sortFile(file.getAbsolutePath(), column);
   }
 
   /**
@@ -127,8 +169,13 @@ class DatanodeBlockInfo {
     return true;
   }
   
+  /** 
+   * @CPSC438
+   * Modified toString to include col number block is sorted on
+   */  
   public String toString() {
     return getClass().getSimpleName() + "(volume=" + volume
-        + ", file=" + file + ", detached=" + detached + ")";
+        + ", file=" + file + ", detached=" + detached
+        + ", sortCol=" + sortCol +")";
   }
 }

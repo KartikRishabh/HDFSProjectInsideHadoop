@@ -37,7 +37,7 @@ public class DFSUtil {
    * @CPSC438
    * Indicates where the external sort program is located
    */
-  public static String EXTERNAL_SORT = "";
+  public static String EXTERNAL_SORT = "/bin/sort.sh";
 
   /**
    * @CPSC438
@@ -147,15 +147,31 @@ public class DFSUtil {
    * Also takes a separator to indicate how to find columns, and int
    * to indicate which column to sort. 
    */
-  public static void sortFile(String filename, int column, ColDataType cdt) {
+  public static void sortFile(String filename, int column) {
+  
 		Process pr = null;
-		
 		String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
 		                    column + " ";
-		
+		                    
+		ColDataType cdt = STRING;
+    
+    BufferedReader in = null;		  
 		try {
+		  in = new BufferedReader(new FileReader(filename));
+		  String inputLine = in.readLine();
+		  if(inputLine != null && 
+		     inputLine.split(",")[column].replaceAll("\\d+", "").length() > 0) {
+		      cdt = INTEGER;
+		  }
+		}	catch(IOException ioe) {
+		  throw new RuntimeException(ioe);
+		} finally {
+      if (in != null)
+        in.close();
+		}
+
+		try {		  
 		  switch (cdt) {
-		  
 		  	case INTEGER:
 		  		pr = Runtime.getRuntime().exec(runCommand + 1);
 			  	pr.waitFor();

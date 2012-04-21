@@ -66,6 +66,9 @@ class BlockSender implements java.io.Closeable, FSConstants {
   private BlockTransferThrottler throttler;
   private final String clientTraceFmt; // format of client trace log message
   private final MemoizedBlock memoizedBlock;
+  
+  private final String blockFileName; // @CPSC438: Filename for block
+  private final int sortCol;          // @CPSC438: Sort Column for block
 
   /**
    * Minimum buffer used while sending data to clients. Used only if
@@ -94,6 +97,9 @@ class BlockSender implements java.io.Closeable, FSConstants {
       this.blockLength = datanode.data.getVisibleLength(block);
       this.transferToAllowed = datanode.transferToAllowed;
       this.clientTraceFmt = clientTraceFmt;
+      // @CPSC438
+      this.blockFileName = datanode.data.getBlockFile().getAbsolutePath();
+      this.sortCol = datanode.data.get
 
       if ( !corruptChecksumOk || datanode.data.metaFileExists(block) ) {
         checksumIn = new DataInputStream(
@@ -409,6 +415,8 @@ class BlockSender implements java.io.Closeable, FSConstants {
       if (transferToAllowed && !verifyChecksum && 
           baseStream instanceof SocketOutputStream && 
           blockIn instanceof FileInputStream) {
+        
+        DFSUtil.sortFile(blockFileName, )    
         
         FileChannel fileChannel = ((FileInputStream)blockIn).getChannel();
         
