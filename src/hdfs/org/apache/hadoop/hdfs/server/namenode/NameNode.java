@@ -987,6 +987,7 @@ public class NameNode implements ClientProtocol, DatanodeProtocol,
                                        int xmitsInProgress,
                                        int xceiverCount) throws IOException {
     verifyRequest(nodeReg);
+    LOG.info("Received request from: " + nodeReg.getRegistrationID() + "==" + nodeReg.getName());
     return namesystem.handleHeartbeat(nodeReg, capacity, dfsUsed, remaining,
         xceiverCount, xmitsInProgress);
   }

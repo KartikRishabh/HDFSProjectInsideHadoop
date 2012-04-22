@@ -908,7 +908,8 @@ public class DataNode extends Configured
                                                        xmitsInProgress.get(),
                                                        getXceiverCount());
           myMetrics.addHeartBeat(now() - startTime);
-          //LOG.info("Just sent heartbeat, with name " + localName);
+          // @CPSC438
+          LOG.info("Just sent heartbeat, with name " + selfAddr);
           if (!processCommand(cmds))
             continue;
         }
@@ -1094,6 +1095,8 @@ public class DataNode extends Configured
       return true;
     final BlockCommand bcmd = cmd instanceof BlockCommand? (BlockCommand)cmd: null;
 
+    LOG.info("ACTION: " + cmd.getAction());
+    
     switch(cmd.getAction()) {
     case DatanodeProtocol.DNA_TRANSFER:
       // Send a copy of a block to another datanode

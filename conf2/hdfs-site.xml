@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+  <property>
+    <name>fs.default.name</name>
+    <value>localhost:9000</value>
+  </property>
+
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>localhost:9001</value>
+  </property>
+
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+        <!-- set to 1 to reduce warnings when 
+        running on a single node -->
+  </property>
+
+	<property>
+		<name>dfs.data.dir</name>
+		<value>/home/accts/krv6/Documents/junior/project/dn2/</value>
+	</property>
+
+	<property>
+		<name>dfs.datanode.address</name>
+		<value>0.0.0.0:50012</value>
+	</property>
+
+	<property>
+		<name>dfs.datanode.ipc.address</name>
+		<value>0.0.0.0:50022</value>
+	</property>
+
+	<property>
+		<name>dfs.datanode.http.address</name>
+		<value>0.0.0.0:50077</value>
+	</property>
+
+	<property>
+		<name>dfs.datanode.https.address</name>
+		<value>0.0.0.0:50477</value>
+	</property>
+
+</configuration>
