@@ -270,13 +270,15 @@ abstract public class FSInputChecker extends FSInputStream {
    * @throws ChecksumException if there is a mismatch
    */
   private void verifySum(long errPos) throws ChecksumException {
-    long crc = getChecksum();
-    long sumValue = sum.getValue();
-    sum.reset();
-    if (crc != sumValue) {
-      throw new ChecksumException(
-          "Checksum error: "+file+" at "+errPos, errPos);
-    }
+      // @CPSC438
+      return ;
+//    long crc = getChecksum();
+//    long sumValue = sum.getValue();
+//    sum.reset();
+//    if ( crc != sumValue) {
+//      throw new ChecksumException(
+//          "Checksum error: "+file+" at "+errPos, errPos);
+//    }
   }
   
   /* calculate checksum value */

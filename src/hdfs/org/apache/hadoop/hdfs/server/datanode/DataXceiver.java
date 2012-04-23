@@ -111,6 +111,14 @@ class DataXceiver implements Runnable, FSConstants {
           datanode.myMetrics.incrWritesFromLocalClient();
         else
           datanode.myMetrics.incrWritesFromRemoteClient();
+        // @CPSC438                          
+        //int sortCol = targets[0].getSortedCol();
+//        String fname = datanode.data.getBlockFile(block);
+//        //fname = localAddress + "/user/" + fname;//"dataset-micro.txt";
+//        LOG.info("\tAbout to begin sort for filename: " + fname + "\n");
+//        DFSUtil.sortFile(fname, 3);
+//        LOG.info("Finished sort!!\n");
+        
         break;
       case DataTransferProtocol.OP_REPLACE_BLOCK: // for balancing purpose; send to a destination
         replaceBlock(in);
@@ -398,13 +406,6 @@ class DataXceiver implements Runnable, FSConstants {
       String mirrorAddr = (mirrorSock == null) ? null : mirrorNode;
       blockReceiver.receiveBlock(mirrorOut, mirrorIn, replyOut,
                                  mirrorAddr, null, targets.length);
-       
-      // @CPSC438                          
-      int sortCol = targets[0].getSortedCol();
-      String fname = block.getBlockName();
-      LOG.info("About to begin sort!");
-      DFSUtil.sortFile(fname, sortCol);
-      LOG.info("Finished sort!!\n");
       
       // if this write is for a replication request (and not
       // from a client), then confirm block. For client-writes,
@@ -416,10 +417,27 @@ class DataXceiver implements Runnable, FSConstants {
                  " dest: " + localAddress +
                  " of size " + block.getNumBytes());
       }
-
+      
+      // @CPSC438                          
+      
       if (datanode.blockScanner != null) {
         datanode.blockScanner.addBlock(block);
       }
+      
+      //int sortCol = targets[0].getSortedCol();
+      try {
+        Thread.sleep(100);
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
+      
+//      String fname = datanode.publicDataSet.getFile(block).getAbsolutePath();
+//      //block.getBlockName() + "_" + block.getGenerationStamp();
+//      //fname = localAddress + "/user/" + fname;//"dataset-micro.txt";
+//      LOG.info("\tAbout to begin sort for filename: " + fname + "\n");
+//      DFSUtil.sortFile(fname, 3);
+//      LOG.info("Finished sort!!\n");
+
       
     } catch (IOException ioe) {
       LOG.info("writeBlock " + block + " received exception " + ioe);

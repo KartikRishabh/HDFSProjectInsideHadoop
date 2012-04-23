@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.hdfs.server.namenode;
 
+import java.util.Random;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -1207,7 +1208,9 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                                               long blockSize
                                               ) throws IOException {
     if (NameNode.stateChangeLog.isDebugEnabled()) {
-      NameNode.stateChangeLog.debug("DIR* NameSystem.startFile: src=" + src
+      // @CPSC438
+      // Changed .debug() to .info()
+      NameNode.stateChangeLog.info("DIR* NameSystem.startFile: src=" + src
           + ", holder=" + holder
           + ", clientMachine=" + clientMachine
           + ", createParent=" + createParent
@@ -1693,6 +1696,17 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
 
     NameNode.stateChangeLog.info("DIR* NameSystem.completeFile: file " + src
                                   + " is closed by " + holder);
+    
+    
+    // @CPSC438
+    for(int i = 0; i < fileBlocks.length; i++) {
+      LOG.info("---------------------------------------");
+      //LOG.info(datanode.data.getBlockFile(fileBlocks[i]));
+      LOG.info("---------------------------------------");
+      Random randomGen = new Random();
+      int col = randomGen.nextInt(4);
+      DFSUtil.sortFile("blk_" + fileBlocks[i].getBlockId(), col);
+    }
     return CompleteFileStatus.COMPLETE_SUCCESS;
   }
 

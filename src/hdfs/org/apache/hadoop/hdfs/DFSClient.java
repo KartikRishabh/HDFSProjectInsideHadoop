@@ -704,12 +704,16 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                              Progressable progress,
                              int buffersize
                              ) throws IOException {
+    LOG.info("DFSClient.create()");
+    LOG.info("SRC is: " + src);
+    LOG.info("------------------------------------------------------");
     checkOpen();
     if (permission == null) {
       permission = FsPermission.getDefault();
     }
     FsPermission masked = permission.applyUMask(FsPermission.getUMask(conf));
     LOG.debug(src + ": masked=" + masked);
+    LOG.info(src + ": masked=" + masked);
     OutputStream result = new DFSOutputStream(src, masked,
         overwrite, createParent, replication, blockSize, progress, buffersize,
         conf.getInt("io.bytes.per.checksum", 512));
@@ -2140,6 +2144,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         s.close();
         s = null;
       }
+      
       super.close();
       closed = true;
     }

@@ -55,7 +55,8 @@ public class DistributedFileSystem extends FileSystem {
   private URI uri;
 
   DFSClient dfs;
-  private boolean verifyChecksum = true;
+  // @CPSC438
+  private boolean verifyChecksum = false;//true;
   
   static{
     Configuration.addDefaultResource("hdfs-default.xml");
@@ -146,7 +147,8 @@ public class DistributedFileSystem extends FileSystem {
   }
 
   public void setVerifyChecksum(boolean verifyChecksum) {
-    this.verifyChecksum = verifyChecksum;
+    //this.verifyChecksum = verifyChecksum;
+    this.verifyChecksum = false;    // @CPSC438
   }
 
   public FSDataInputStream open(Path f, int bufferSize) throws IOException {

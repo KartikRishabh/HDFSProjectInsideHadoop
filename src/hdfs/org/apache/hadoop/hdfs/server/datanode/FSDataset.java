@@ -1085,11 +1085,13 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
   }
   
   public synchronized InputStream getBlockInputStream(Block b) throws IOException {
+    DataNode.LOG.info("Logging inputStream: " + getBlockFile(b));
     return new FileInputStream(getBlockFile(b));
   }
 
   public synchronized InputStream getBlockInputStream(Block b, long seekOffset) throws IOException {
 
+    DataNode.LOG.info("Logging inputStream: " + getBlockFile(b));
     File blockFile = getBlockFile(b);
     RandomAccessFile blockInFile = new RandomAccessFile(blockFile, "r");
     if (seekOffset > 0) {
@@ -1485,10 +1487,13 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
       // block yet, it could get removed if the datanode restarts. If this
       // is a write or append request, then it is a valid block.
       if (replicationRequest) {
+//        LOG.info("Just throw it in the Map!");
         volumeMap.put(b, new DatanodeBlockInfo(v));
       } else {
+//        LOG.info("Just throw it in the Map: F");
         volumeMap.put(b, new DatanodeBlockInfo(v, f));
       }
+//      LOG.info("Done putting!");
       ongoingCreates.put(b, new ActiveFile(f, threads));
     }
 

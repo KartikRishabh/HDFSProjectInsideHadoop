@@ -60,28 +60,40 @@ public class Block implements Writable, Comparable<Block> {
   private long blockId;
   private long numBytes;
   private long generationStamp;
+  private int sortCol;            // @CPSC438
 
-  public Block() {this(0, 0, 0);}
+  // @CPSC438: Added fourth column
+  public Block() { this(0, 0, 0, 0); }
 
-  public Block(final long blkid, final long len, final long generationStamp) {
-    set(blkid, len, generationStamp);
+  //@CPSC438
+  public Block(final long blkid, final long len, final long generationStamp,
+                final int sortCol) {
+    set(blkid, len, generationStamp, sortCol);
   }
 
-  public Block(final long blkid) {this(blkid, 0, GenerationStamp.WILDCARD_STAMP);}
+  // @CPSC438
+  public Block(final long blkid) {
+    this(blkid, 0, GenerationStamp.WILDCARD_STAMP, 0);
+  }
 
-  public Block(Block blk) {this(blk.blockId, blk.numBytes, blk.generationStamp);}
+  // @CPSC438
+  public Block(Block blk) {
+    this(blk.blockId, blk.numBytes, blk.generationStamp, blk.sortCol);
+  }
 
   /**
    * Find the blockid from the given filename
+   * @CPSC438
    */
-  public Block(File f, long len, long genstamp) {
-    this(filename2id(f.getName()), len, genstamp);
+  public Block(File f, long len, long genstamp, int sortCol) {
+    this(filename2id(f.getName()), len, genstamp, sortCol);
   }
-
-  public void set(long blkid, long len, long genStamp) {
+  
+  public void set(long blkid, long len, long genStamp, int sortCol) {
     this.blockId = blkid;
     this.numBytes = len;
     this.generationStamp = genStamp;
+    this.sortCol = sortCol;     // @CPSC438
   }
   /**
    */
@@ -114,6 +126,15 @@ public class Block implements Writable, Comparable<Block> {
   
   public void setGenerationStamp(long stamp) {
     generationStamp = stamp;
+  }
+  
+  // @CPSC438
+  public int getSortedCol() {
+    return sortCol;
+  }
+  // @CPSC438
+  public void setSortedCol(int sortCol) {
+    this.sortCol = sortCol;
   }
 
   /**

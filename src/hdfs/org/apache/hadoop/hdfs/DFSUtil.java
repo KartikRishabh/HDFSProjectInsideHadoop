@@ -18,29 +18,36 @@
 
 package org.apache.hadoop.hdfs;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+//BufferedReader;
+//import java.io.FileReader;
+//import java.io.IOException;
+//import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.StringTokenizer;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.net.NodeBase;
 
+import org.apache.commons.logging.*;
+
 public class DFSUtil {
+
+  public static final Log LOG = LogFactory.getLog(DFSClient.class);
 
   /**
    * @CPSC438
    * Indicates where the external sort program is located
    */
-  public static String EXTERNAL_SORT = "/bin/sort.sh";
+  public static String EXTERNAL_SORT = "/home/accts/krv6/bin/sort.sh";
 
   /**
    * @CPSC438
@@ -152,42 +159,85 @@ public class DFSUtil {
    */
   public static void sortFile(String filename, int column) {
   
-		Process pr = null;
-		String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
+    try {
+//      Configuration config = new Configuration();
+//      config.set("fs.default.name", "hdfs://127.0.0.1:9000/");
+//      FileSystem dfs = FileSystem.get(config);
+//    
+//      String src = "hdfs://127.0.0.1:9000/" + filename;
+//      //"new Path(dfs.getWorkingDirectory() + "/" + filename);
+//    
+//      LOG.info("Filename was: " + filename);
+//      LOG.info("SRC is => " + src.toString());
+//  
+      FileInputStream is = new FileInputStream("/tmp/hadoop-krv6/dfs/data/current/" + filename);
+      
+      File tmpfile = new File("tmpFile_" + filename);
+      FileOutputStream fos = new FileOutputStream(tmpfile);
+      
+      BufferedReader br = new BufferedReader(new InputStreamReader(is));
+      PrintWriter pw = new PrintWriter(fos);
+      
+      String newLine = "";
+      while((newLine = br.readLine()) != null)
+        pw.println(newLine);
+      br.close();
+      pw.close();
+      
+		  Process pr = null;
+		  String runCommand = DFSUtil.EXTERNAL_SORT + " tmpFile_" +filename + " " + 
 		                    column + " ";
 		                    
-		ColDataType cdt = ColDataType.STRING;
+		  ColDataType cdt = ColDataType.INTEGER;
     
-    BufferedReader in = null;		  
-		try {
-		  in = new BufferedReader(new FileReader(filename));
+      BufferedReader in = null;
+      in = new BufferedReader(new InputStreamReader(
+                              new FileInputStream("tmpFile_" + filename)));
+                              
 		  String inputLine = in.readLine();
-		  if(inputLine != null && 
-		     inputLine.split(",")[column].replaceAll("\\d+", "").length() > 0) {
-		      cdt = ColDataType.INTEGER;
-		  }
+      if(inputLine != null && 
+         inputLine.split(",")[column].replaceAll("\\d+", "").length() > 0) {
+        cdt = ColDataType.STRING;
+      }
       in.close();
-		}	catch(IOException ioe) {
-		  throw new RuntimeException(ioe);
-		} 
-
-		try {		  
+		  
 		  switch (cdt) {
-		  	case INTEGER:
-		  		pr = Runtime.getRuntime().exec(runCommand + 1);
-			  	pr.waitFor();
-		  	  break;
-		  	
-		  	case STRING:
-		  	default:
-		  		pr = Runtime.getRuntime().exec(runCommand + 0);
-			  	pr.waitFor();
-			  	break;
+		    case INTEGER:
+		    	pr = Runtime.getRuntime().exec(runCommand + 1);
+			   	pr.waitFor();
+		   	  break;
+		    	
+		   	case STRING:
+		   	default:
+		   		pr = Runtime.getRuntime().exec(runCommand + 0);
+			   	pr.waitFor();
+			   break;
 		  }
+		  LOG.info("Really, trully, did finish sorting");
+		  
+		  is = new FileInputStream("tmpFile_" + filename);
+		  fos = new FileOutputStream("/tmp/hadoop-krv6/dfs/data/current/" + filename);
+		  br = new BufferedReader(new InputStreamReader(is));
+		  pw = new PrintWriter(fos);
+		  inputLine = "";
+		  while( (inputLine = br.readLine()) != null)
+		    pw.println(inputLine);
+		  br.close();
+		  pw.close();	  
+		  
+		  in.close();
+		  
+//		  in = new BufferedReader(new FileReader(src.toString()));
+//		  String readtheLines = "";
+//		  int counter = 0;
+//		  while((readtheLines = in.readLine())!=null && (counter++ < 20))
+//		    LOG.info(readtheLines);
+//		  in.close();
 		}
 		catch(Exception e) {
+		  LOG.info("What the hell is going on!");
 		  e.printStackTrace();
 		}
+	  LOG.info("Bye!");
 	}
 }
-

@@ -195,7 +195,9 @@ public class DataNode extends Configured
   }
   
   public DatanodeProtocol namenode = null;
+  // @CPSC438
   public FSDatasetInterface data = null;
+  public FSDataset publicDataSet = null;
   public DatanodeRegistration dnRegistration = null;
 
   volatile boolean shouldRun = true;
@@ -232,6 +234,9 @@ public class DataNode extends Configured
   BlockTokenSecretManager blockTokenSecretManager;
   boolean isBlockTokenInitialized = false;
   final String userWithLocalPathAccess;
+
+  private int sortedCol;       // @CPSC438: Column block is sorted on
+  
 
   /**
    * Testing hook that allows tests to delay the sending of blockReceived RPCs
@@ -288,6 +293,10 @@ public class DataNode extends Configured
   DataNode(final Configuration conf,
            final AbstractList<File> dataDirs, SecureResources resources) throws IOException {
     super(conf);
+    
+    
+    this.sortedCol = (int)(1 + Math.random() * 4);
+      
     SecurityUtil.login(conf, DFSConfigKeys.DFS_DATANODE_KEYTAB_FILE_KEY, 
         DFSConfigKeys.DFS_DATANODE_USER_NAME_KEY);
 
@@ -375,7 +384,11 @@ public class DataNode extends Configured
         try {
           //Equivalent of following (can't do because Simulated is in test dir)
           //  this.data = new SimulatedFSDataset(conf);
+          // @CPSC438
           this.data = (FSDatasetInterface) ReflectionUtils.newInstance(
+              Class.forName("org.apache.hadoop.hdfs.server.datanode.SimulatedFSDataset"), conf);
+          // @CPSC438
+          this.publicDataSet = (FSDataset) ReflectionUtils.newInstance(
               Class.forName("org.apache.hadoop.hdfs.server.datanode.SimulatedFSDataset"), conf);
         } catch (ClassNotFoundException e) {
           throw new IOException(StringUtils.stringifyException(e));
@@ -387,6 +400,7 @@ public class DataNode extends Configured
       this.dnRegistration.setStorageInfo(storage);
       // initialize data node internal structure
       this.data = new FSDataset(storage, conf);
+      this.publicDataSet = new FSDataset(storage, conf);    // @CPSC438
     }
       
     // register datanode MXBean
@@ -908,8 +922,7 @@ public class DataNode extends Configured
                                                        xmitsInProgress.get(),
                                                        getXceiverCount());
           myMetrics.addHeartBeat(now() - startTime);
-          // @CPSC438
-          LOG.info("Just sent heartbeat, with name " + selfAddr);
+          // LOG.info("Just sent heartbeat, with name " + selfAddr);
           if (!processCommand(cmds))
             continue;
         }
@@ -921,6 +934,10 @@ public class DataNode extends Configured
           synchronized(delHints) {
             int numBlocks = receivedBlockList.size();
             if (numBlocks > 0) {
+              for(int i = 0; i < numBlocks; i++) {
+                receivedBlockList[i].setSortedCol(this.sortedCol);
+              
+              }
               if(numBlocks!=delHints.size()) {
                 LOG.warn("Panic: receiveBlockList and delHints are not of the same length" );
               }
