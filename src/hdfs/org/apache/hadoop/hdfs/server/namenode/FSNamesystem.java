@@ -2275,7 +2275,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     else {
       // update last block, construct newblockinfo and add it to the blocks map
       // @CPSC438
-      lastblock.set(lastblock.getBlockId(), newlength, newgenerationstamp, lastblock.getSortedCol());
+      lastblock.set(lastblock.getBlockId(), newlength, newgenerationstamp);
+      lastblock.setSortedCol(lastblock.getSortedCol());
       final BlockInfo newblockinfo = blocksMap.addINode(lastblock, pendingFile);
 
       // find the DatanodeDescriptor objects
