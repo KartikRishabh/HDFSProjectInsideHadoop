@@ -158,6 +158,9 @@ public class DFSUtil {
    * to indicate which column to sort. 
    */
   public static void sortFile(String filename, int column) {
+    
+    LOG.info("Filename: " + filename);
+    LOG.info("S Column: " + column);
   
     try {
 //      Configuration config = new Configuration();
@@ -170,7 +173,8 @@ public class DFSUtil {
 //      LOG.info("Filename was: " + filename);
 //      LOG.info("SRC is => " + src.toString());
 //  
-      FileInputStream is = new FileInputStream("/tmp/hadoop-krv6/dfs/data/current/" + filename);
+      FileInputStream is = new FileInputStream(filename);
+      //"/tmp/hadoop-krv6/dfs/data/current/" +filename);
       
       File tmpfile = new File("tmpFile_" + filename);
       FileOutputStream fos = new FileOutputStream(tmpfile);
@@ -216,7 +220,9 @@ public class DFSUtil {
 		  LOG.info("Really, trully, did finish sorting");
 		  
 		  is = new FileInputStream("tmpFile_" + filename);
-		  fos = new FileOutputStream("/tmp/hadoop-krv6/dfs/data/current/" + filename);
+		  fos = new FileOutputStream(filename);
+		  //"/tmp/hadoop-krv6/dfs/data/current/" + filename);
+		  
 		  br = new BufferedReader(new InputStreamReader(is));
 		  pw = new PrintWriter(fos);
 		  inputLine = "";

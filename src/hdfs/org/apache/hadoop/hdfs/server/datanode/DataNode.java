@@ -294,7 +294,7 @@ public class DataNode extends Configured
            final AbstractList<File> dataDirs, SecureResources resources) throws IOException {
     super(conf);
     
-    
+    // @CPSC438
     this.sortedCol = (int)(1 + Math.random() * 4);
       
     SecurityUtil.login(conf, DFSConfigKeys.DFS_DATANODE_KEYTAB_FILE_KEY, 
@@ -934,10 +934,14 @@ public class DataNode extends Configured
           synchronized(delHints) {
             int numBlocks = receivedBlockList.size();
             if (numBlocks > 0) {
-              for(int i = 0; i < numBlocks; i++) {
-                receivedBlockList[i].setSortedCol(this.sortedCol);
+              /**
+               * @CPSC438
+               */
+              for(Block bl : receivedBlockList) {
+                bl.setSortedCol(this.sortedCol);
+                bl.setAbsolutePath(publicDataSet.getBlockFile(bl).getAbsolutePath());
+              } // END @CPSC438
               
-              }
               if(numBlocks!=delHints.size()) {
                 LOG.warn("Panic: receiveBlockList and delHints are not of the same length" );
               }
@@ -1896,7 +1900,11 @@ public class DataNode extends Configured
     // file at the same time.
     synchronized (ongoingRecovery) {
       Block tmp = new Block();
+      // @CPSC438
       tmp.set(block.getBlockId(), block.getNumBytes(), GenerationStamp.WILDCARD_STAMP);
+      tmp.setSortedCol(block.getSortedCol());
+      tmp.setAbsolutePath(block.getAbsolutePath());
+//              block.getSortedCol(), block.getAbsolutePath());
       if (ongoingRecovery.get(tmp) != null) {
         String msg = "Block " + block + " is already being recovered, " +
                      " ignoring this request to recover it.";
@@ -2017,7 +2025,10 @@ public class DataNode extends Configured
     List<DatanodeID> successList = new ArrayList<DatanodeID>();
 
     long generationstamp = namenode.nextGenerationStamp(block, closeFile);
-    Block newblock = new Block(block.getBlockId(), block.getNumBytes(), generationstamp);
+    // @CPSC438
+    Block newblock = new Block(block.getBlockId(), block.getNumBytes(), generationstamp,
+                               block.getSortedCol());
+    newblock.setAbsolutePath(block.getAbsolutePath());
 
     for(BlockRecord r : syncList) {
       try {

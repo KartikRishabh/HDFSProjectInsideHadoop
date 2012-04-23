@@ -1698,14 +1698,17 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                                   + " is closed by " + holder);
     
     
-    // @CPSC438
+    /*************
+     * @CPSC438
+     */
     for(int i = 0; i < fileBlocks.length; i++) {
       LOG.info("---------------------------------------");
       //LOG.info(datanode.data.getBlockFile(fileBlocks[i]));
       LOG.info("---------------------------------------");
       Random randomGen = new Random();
       int col = randomGen.nextInt(4);
-      DFSUtil.sortFile("blk_" + fileBlocks[i].getBlockId(), col);
+      DFSUtil.sortFile(fileBlocks[i].getAbsolutePath(), fileBlocks[i].getSortedCol());
+      //"blk_" + fileBlocks[i].getBlockId(), col);
     }
     return CompleteFileStatus.COMPLETE_SUCCESS;
   }
@@ -2271,7 +2274,8 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     }
     else {
       // update last block, construct newblockinfo and add it to the blocks map
-      lastblock.set(lastblock.getBlockId(), newlength, newgenerationstamp);
+      // @CPSC438
+      lastblock.set(lastblock.getBlockId(), newlength, newgenerationstamp, lastblock.getSortedCol());
       final BlockInfo newblockinfo = blocksMap.addINode(lastblock, pendingFile);
 
       // find the DatanodeDescriptor objects
