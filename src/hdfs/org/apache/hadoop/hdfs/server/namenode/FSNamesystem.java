@@ -940,6 +940,14 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     Server.getRemoteIp(),
                     "open", src, null, null);
     }
+    // @CPSC438
+    List<LocatedBlock> theLocatedBlocks = ret.getLocatedBlocks();
+    for(LocatedBlock lb : theLocatedBlocks) {
+      DatanodeInfo[] locs = lb.getLocations();
+      for(int i = 0; i < locs.length; i++)
+        LOG.info("==> " + locs[i].getName());
+    }
+    
     return ret;
   }
 
@@ -1701,15 +1709,14 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
     /*************
      * @CPSC438
      */
-    for(int i = 0; i < fileBlocks.length; i++) {
-      LOG.info("---------------------------------------");
-      //LOG.info(datanode.data.getBlockFile(fileBlocks[i]));
-      LOG.info("---------------------------------------");
-      Random randomGen = new Random();
-      int col = randomGen.nextInt(4);
-      DFSUtil.sortFile(fileBlocks[i].getAbsolutePath(), fileBlocks[i].getSortedCol());
-      //"blk_" + fileBlocks[i].getBlockId(), col);
-    }
+//    for(int i = 0; i < fileBlocks.length; i++) {
+//      LOG.info("---------------------------------------");
+//      //LOG.info(datanode.data.getBlockFile(fileBlocks[i]));
+////      Random randomGen = new Random();
+////      int col = randomGen.nextInt(4);
+//      DFSUtil.sortFile(fileBlocks[i].getAbsolutePath(), fileBlocks[i].getSortedCol());
+//      //"blk_" + fileBlocks[i].getBlockId(), col);
+//    }
     return CompleteFileStatus.COMPLETE_SUCCESS;
   }
 

@@ -61,8 +61,8 @@ public class Block implements Writable, Comparable<Block> {
   private long numBytes;
   private long generationStamp;
   
-  private int sortCol;            // @CPSC438
-  private String absoluteFilePath = ""; // @CPSC438
+  private int sortCol = -1;             // @CPSC438
+  private int opCode = 1;                // @CPSC438
 
   // @CPSC438: Added fourth column
   public Block() { this(0, 0, 0, 0); }
@@ -70,7 +70,6 @@ public class Block implements Writable, Comparable<Block> {
   public Block(final long blkid, final long len, final long generationStamp, 
                 int sortCol) {
     set(blkid, len, generationStamp);
-    this.sortCol = sortCol;
   }
 
   //@CPSC438
@@ -106,8 +105,8 @@ public class Block implements Writable, Comparable<Block> {
     this.blockId = blkid;
     this.numBytes = len;
     this.generationStamp = genStamp;
-    this.sortCol = sortCol;                   // @CPSC438
-    this.absoluteFilePath = ""; // @CPSC438
+    this.sortCol = -1;                  // @CPSC438
+    this.opCode = 1;          // @CPSC438
   }
   /**
    */
@@ -152,13 +151,12 @@ public class Block implements Writable, Comparable<Block> {
   }
   
   // @CPSC438
-  public String getAbsolutePath() {
-    return absoluteFilePath;
+  public int getOpCode() {
+    return opCode;
   }
-  
   // @CPSC438
-  public void setAbsolutePath(String absoluteFilePath) {
-    this.absoluteFilePath = absoluteFilePath;
+  public void setOpCode(int opCode) {
+    this.opCode = opCode;
   }
 
   /**
@@ -174,6 +172,7 @@ public class Block implements Writable, Comparable<Block> {
     out.writeLong(blockId);
     out.writeLong(numBytes);
     out.writeLong(generationStamp);
+    //out.writeInt(sortCol);
   }
 
   public void readFields(DataInput in) throws IOException {
@@ -183,6 +182,7 @@ public class Block implements Writable, Comparable<Block> {
     if (numBytes < 0) {
       throw new IOException("Unexpected block size: " + numBytes);
     }
+    //this.sortCol = in.readInt();      // @CPSC438
   }
 
   /////////////////////////////////////

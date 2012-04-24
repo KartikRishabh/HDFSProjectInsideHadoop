@@ -392,7 +392,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     out.writeInt(xceiverCount);
     Text.writeString(out, location);
     Text.writeString(out, hostName == null? "": hostName);
-    out.writeInt(sortCol); // @CPSC438
+    //out.writeInt(sortCol); // @CPSC438
     WritableUtils.writeEnum(out, getAdminState());
   }
 
@@ -410,7 +410,7 @@ public class DatanodeInfo extends DatanodeID implements Node {
     this.xceiverCount = in.readInt();
     this.location = Text.readString(in);
     this.hostName = Text.readString(in);
-    this.sortCol = in.readInt(); // @CPSC438
+    //this.sortCol = in.readInt(); // @CPSC438
     setAdminState(WritableUtils.readEnum(in, AdminStates.class));
   }
 }

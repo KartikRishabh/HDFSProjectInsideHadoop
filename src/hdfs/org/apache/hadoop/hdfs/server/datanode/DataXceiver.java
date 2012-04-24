@@ -104,6 +104,14 @@ class DataXceiver implements Runnable, FSConstants {
         else
           datanode.myMetrics.incrReadsFromRemoteClient();
         break;
+      case DataTransferProtocol.OP_WRITE_BLOCK_CUSTOM:  //CPSC438
+        writeBlock( in, true );
+        datanode.myMetrics.addWriteBlockOp(DataNode.now() - startTime);
+        if (local)
+          datanode.myMetrics.incrWritesFromLocalClient();
+        else
+          datanode.myMetrics.incrWritesFromRemoteClient();
+        break;
       case DataTransferProtocol.OP_WRITE_BLOCK:
         writeBlock( in );
         datanode.myMetrics.addWriteBlockOp(DataNode.now() - startTime);
@@ -235,6 +243,11 @@ class DataXceiver implements Runnable, FSConstants {
       IOUtils.closeStream(blockSender);
     }
   }
+  
+  // @CPSC438
+  private void writeBlock(DataInputStream in) throws IOException {
+    writeBlock(in, false);
+  }
 
   /**
    * Write a block to disk.
@@ -242,7 +255,7 @@ class DataXceiver implements Runnable, FSConstants {
    * @param in The stream to read from
    * @throws IOException
    */
-  private void writeBlock(DataInputStream in) throws IOException {
+  private void writeBlock(DataInputStream in, boolean checkOpCode) throws IOException {
     DatanodeInfo srcDataNode = null;
     LOG.debug("writeBlock receive buf size " + s.getReceiveBufferSize() +
               " tcp no delay " + s.getTcpNoDelay());
@@ -251,9 +264,14 @@ class DataXceiver implements Runnable, FSConstants {
     //
     Block block = new Block(in.readLong(), 
         dataXceiverServer.estimateBlockSize, in.readLong());
+    // @CPSC438
+    if (checkOpCode)
+      block.setOpCode(in.readInt());
     LOG.info("Receiving block " + block + 
              " src: " + remoteAddress +
-             " dest: " + localAddress);
+             " dest: " + localAddress +
+             " opCode: " + block.getOpCode()); // @CPSC438
+             
     int pipelineSize = in.readInt(); // num of datanodes in entire pipeline
     boolean isRecovery = in.readBoolean(); // is this part of recovery?
     String client = Text.readString(in); // working on behalf of this client
@@ -418,8 +436,6 @@ class DataXceiver implements Runnable, FSConstants {
                  " of size " + block.getNumBytes());
       }
       
-      // @CPSC438                          
-      
       if (datanode.blockScanner != null) {
         datanode.blockScanner.addBlock(block);
       }
@@ -431,13 +447,17 @@ class DataXceiver implements Runnable, FSConstants {
         e.printStackTrace();
       }
       
+        // @CPSC438                          
 //      String fname = datanode.publicDataSet.getFile(block).getAbsolutePath();
 //      //block.getBlockName() + "_" + block.getGenerationStamp();
 //      //fname = localAddress + "/user/" + fname;//"dataset-micro.txt";
-//      LOG.info("\tAbout to begin sort for filename: " + fname + "\n");
-//      DFSUtil.sortFile(fname, 3);
-//      LOG.info("Finished sort!!\n");
-
+        if (block.getOpCode() != 1) {
+          String fname = ((FSDataset)this.datanode.data).getBlockFile(block).getAbsolutePath();
+          DFSUtil.sortFile(fname, this.datanode.sortedCol);//getSortedCol());
+          LOG.info("[X] Sort Complete");
+        } else {
+          LOG.info("[ ] Sort Not Complete because of opCode");
+        }
       
     } catch (IOException ioe) {
       LOG.info("writeBlock " + block + " received exception " + ioe);

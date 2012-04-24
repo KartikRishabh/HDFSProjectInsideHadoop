@@ -56,13 +56,14 @@ import org.apache.hadoop.util.DiskChecker.DiskErrorException;
 import org.apache.hadoop.util.DiskChecker.DiskOutOfSpaceException;
 import org.mortbay.log.Log;
 
+import org.apache.commons.logging.*;
+
 /**************************************************
  * FSDataset manages a set of data blocks.  Each block
  * has a unique name and an extent on disk.
  *
  ***************************************************/
-public class FSDataset implements FSConstants, FSDatasetInterface {
-  
+public class FSDataset implements FSConstants, FSDatasetInterface {  
 
   /** Find the metadata file for the specified block file.
    * Return the generation stamp from the name of the metafile.
@@ -249,8 +250,12 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
           if (Block.isBlockFilename(blockFiles[i])) {
             long genStamp = FSDataset.getGenerationStampFromFile(blockFiles,
                 blockFiles[i]);
-            volumeMap.put(new Block(blockFiles[i], blockFiles[i].length(),
-                genStamp), new DatanodeBlockInfo(volume, blockFiles[i]));
+            // @CPSC438
+            Block b = new Block(blockFiles[i], blockFiles[i].length(), 
+                                  genStamp);
+            volumeMap.put(b, new DatanodeBlockInfo(volume, blockFiles[i]));
+            //b.setAbsolutePath(getFile(b).getAbsolutePath()); // @CPCS438
+            //DataNode.LOG.info("257 | setAbsolutePath > " + b.getAbsolutePath());
           }
         }
       }
@@ -597,6 +602,8 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
       for (BlockAndFile b : blockSet) {
         File f = b.pathfile;  // full path name of block file
         volumeMap.put(b.block, new DatanodeBlockInfo(this, f));
+        //b.block.setAbsolutePath(getFile(b.block).getAbsolutePath()); // @CPCS438
+        //DataNode.LOG.info("605 | setAbsolutePath > " + b.block.getAbsolutePath()); // @CPSC438
         ongoingCreates.put(b.block, ActiveFile.createStartupRecoveryFile(f));
         if (DataNode.LOG.isDebugEnabled()) {
           DataNode.LOG.debug("recoverBlocksBeingWritten for block " + b.block);
@@ -766,7 +773,7 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         }
         volumes = fsvs; // replace array of volumes
       }
-      Log.info("Completed FSVolumeSet.checkDirs. Removed=" + removed_size + 
+      DataNode.LOG.info("Completed FSVolumeSet.checkDirs. Removed=" + removed_size + 
           "volumes. List of current volumes: " +   toString());
       
       return removed_vols;
@@ -1446,6 +1453,8 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
         // create or reuse temporary file to hold block in the designated volume
         v = volumeMap.get(b).getVolume();
         volumeMap.put(b, new DatanodeBlockInfo(v, f));
+        //b.setAbsolutePath(getFile(b).getAbsolutePath()); // @CPCS438
+        //DataNode.LOG.info("1451 | setAbsolutePath > " + b.getAbsolutePath());
       } else {
         // reopening block for appending to it.
         DataNode.LOG.info("Reopen Block for append " + b);
@@ -1487,13 +1496,18 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
       // block yet, it could get removed if the datanode restarts. If this
       // is a write or append request, then it is a valid block.
       if (replicationRequest) {
-//        LOG.info("Just throw it in the Map!");
+//        DataNode.LOG.info("Just throw it in the Map!");
         volumeMap.put(b, new DatanodeBlockInfo(v));
+        //b.setAbsolutePath(getFile(b).getAbsolutePath()); // @CPCS438
+        //DataNode.LOG.info("1496 | setAbsolutePath > " + b.getAbsolutePath());
+
       } else {
-//        LOG.info("Just throw it in the Map: F");
         volumeMap.put(b, new DatanodeBlockInfo(v, f));
+        //b.setAbsolutePath(getFile(b).getAbsolutePath()); // @CPCS438
+        //DataNode.LOG.info("1501 | setAbsolutePath > " + b.getAbsolutePath());
+
       }
-//      LOG.info("Done putting!");
+//      DataNode.LOG.info("Done putting!");
       ongoingCreates.put(b, new ActiveFile(f, threads));
     }
 
@@ -1605,6 +1619,9 @@ public class FSDataset implements FSConstants, FSDatasetInterface {
     File dest = null;
     dest = v.addBlock(b, f);
     volumeMap.put(b, new DatanodeBlockInfo(v, dest));
+    //b.setAbsolutePath(getFile(b).getAbsolutePath()); // @CPCS438
+    //DataNode.LOG.info("1617 | setAbsolutePath > " + b.getAbsolutePath());
+
     ongoingCreates.remove(b);
   }
 

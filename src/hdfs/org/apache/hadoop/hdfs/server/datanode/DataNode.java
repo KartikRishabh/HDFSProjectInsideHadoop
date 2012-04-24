@@ -235,7 +235,7 @@ public class DataNode extends Configured
   boolean isBlockTokenInitialized = false;
   final String userWithLocalPathAccess;
 
-  private int sortedCol;       // @CPSC438: Column block is sorted on
+  public int sortedCol;       // @CPSC438: Column block is sorted on
   
 
   /**
@@ -296,6 +296,7 @@ public class DataNode extends Configured
     
     // @CPSC438
     this.sortedCol = (int)(1 + Math.random() * 4);
+    LOG.info("Setting my sorted column to: " + this.sortedCol);
       
     SecurityUtil.login(conf, DFSConfigKeys.DFS_DATANODE_KEYTAB_FILE_KEY, 
         DFSConfigKeys.DFS_DATANODE_USER_NAME_KEY);
@@ -591,6 +592,19 @@ public class DataNode extends Configured
   public static DataNode getDataNode() {
     return datanodeObject;
   } 
+  
+  /**
+   * @CPSC438
+   */
+  public int getSortedCol() {
+    return sortedCol;
+  }
+  /**
+   * @CPSC438
+   */
+  public void setSortedCol(int sortedCol) {
+    this.sortedCol = sortedCol;
+  }
 
   public static InterDatanodeProtocol createInterDataNodeProtocolProxy(
       DatanodeID datanodeid, final Configuration conf, final int socketTimeout) throws IOException {
@@ -934,13 +948,15 @@ public class DataNode extends Configured
           synchronized(delHints) {
             int numBlocks = receivedBlockList.size();
             if (numBlocks > 0) {
-              /**
-               * @CPSC438
-               */
-              for(Block bl : receivedBlockList) {
-                bl.setSortedCol(this.sortedCol);
-                bl.setAbsolutePath(publicDataSet.getBlockFile(bl).getAbsolutePath());
-              } // END @CPSC438
+
+//              /**
+//               * @CPSC438
+//               */
+//              for(Block bl : receivedBlockList) {
+//                bl.setSortedCol(this.sortedCol);
+//                LOG.info("Changing Block sort col to: " + bl.getSortedCol());
+//                //bl.setAbsolutePath(publicDataSet.getBlockFile(bl).getAbsolutePath());
+//              } // END @CPSC438
               
               if(numBlocks!=delHints.size()) {
                 LOG.warn("Panic: receiveBlockList and delHints are not of the same length" );
@@ -1422,9 +1438,10 @@ public class DataNode extends Configured
         // Header info
         //
         out.writeShort(DataTransferProtocol.DATA_TRANSFER_VERSION);
-        out.writeByte(DataTransferProtocol.OP_WRITE_BLOCK);
+        out.writeByte(DataTransferProtocol.OP_WRITE_BLOCK_CUSTOM);
         out.writeLong(b.getBlockId());
         out.writeLong(b.getGenerationStamp());
+        out.writeInt((b.getOpCode()+1)); // @CPSC438
         out.writeInt(0);           // no pipelining
         out.writeBoolean(false);   // not part of recovery
         Text.writeString(out, ""); // client
@@ -1903,8 +1920,8 @@ public class DataNode extends Configured
       // @CPSC438
       tmp.set(block.getBlockId(), block.getNumBytes(), GenerationStamp.WILDCARD_STAMP);
       tmp.setSortedCol(block.getSortedCol());
-      tmp.setAbsolutePath(block.getAbsolutePath());
-//              block.getSortedCol(), block.getAbsolutePath());
+      //tmp.setAbsolutePath(block.getAbsolutePath());
+//     block.getSortedCol(), block.getAbsolutePath());
       if (ongoingRecovery.get(tmp) != null) {
         String msg = "Block " + block + " is already being recovered, " +
                      " ignoring this request to recover it.";
@@ -2028,7 +2045,7 @@ public class DataNode extends Configured
     // @CPSC438
     Block newblock = new Block(block.getBlockId(), block.getNumBytes(), generationstamp,
                                block.getSortedCol());
-    newblock.setAbsolutePath(block.getAbsolutePath());
+    //newblock.setAbsolutePath(block.getAbsolutePath());
 
     for(BlockRecord r : syncList) {
       try {

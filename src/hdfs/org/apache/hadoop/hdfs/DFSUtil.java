@@ -158,49 +158,23 @@ public class DFSUtil {
    * to indicate which column to sort. 
    */
   public static void sortFile(String filename, int column) {
-    
+
     LOG.info("Filename: " + filename);
     LOG.info("S Column: " + column);
   
     try {
-//      Configuration config = new Configuration();
-//      config.set("fs.default.name", "hdfs://127.0.0.1:9000/");
-//      FileSystem dfs = FileSystem.get(config);
-//    
-//      String src = "hdfs://127.0.0.1:9000/" + filename;
-//      //"new Path(dfs.getWorkingDirectory() + "/" + filename);
-//    
-//      LOG.info("Filename was: " + filename);
-//      LOG.info("SRC is => " + src.toString());
-//  
-      FileInputStream is = new FileInputStream(filename);
-      //"/tmp/hadoop-krv6/dfs/data/current/" +filename);
-      
-      File tmpfile = new File("tmpFile_" + filename);
-      FileOutputStream fos = new FileOutputStream(tmpfile);
-      
-      BufferedReader br = new BufferedReader(new InputStreamReader(is));
-      PrintWriter pw = new PrintWriter(fos);
-      
-      String newLine = "";
-      while((newLine = br.readLine()) != null)
-        pw.println(newLine);
-      br.close();
-      pw.close();
-      
 		  Process pr = null;
-		  String runCommand = DFSUtil.EXTERNAL_SORT + " tmpFile_" +filename + " " + 
+		  String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
 		                    column + " ";
 		                    
 		  ColDataType cdt = ColDataType.INTEGER;
     
       BufferedReader in = null;
-      in = new BufferedReader(new InputStreamReader(
-                              new FileInputStream("tmpFile_" + filename)));
+      in = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
                               
 		  String inputLine = in.readLine();
       if(inputLine != null && 
-         inputLine.split(",")[column].replaceAll("\\d+", "").length() > 0) {
+         inputLine.split(",")[column-1].replaceAll("\\d+", "").length() > 0) {
         cdt = ColDataType.STRING;
       }
       in.close();
@@ -218,27 +192,6 @@ public class DFSUtil {
 			   break;
 		  }
 		  LOG.info("Really, trully, did finish sorting");
-		  
-		  is = new FileInputStream("tmpFile_" + filename);
-		  fos = new FileOutputStream(filename);
-		  //"/tmp/hadoop-krv6/dfs/data/current/" + filename);
-		  
-		  br = new BufferedReader(new InputStreamReader(is));
-		  pw = new PrintWriter(fos);
-		  inputLine = "";
-		  while( (inputLine = br.readLine()) != null)
-		    pw.println(inputLine);
-		  br.close();
-		  pw.close();	  
-		  
-		  in.close();
-		  
-//		  in = new BufferedReader(new FileReader(src.toString()));
-//		  String readtheLines = "";
-//		  int counter = 0;
-//		  while((readtheLines = in.readLine())!=null && (counter++ < 20))
-//		    LOG.info(readtheLines);
-//		  in.close();
 		}
 		catch(Exception e) {
 		  LOG.info("What the hell is going on!");
