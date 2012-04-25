@@ -250,7 +250,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY,
         DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_DEFAULT);
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Short circuit read is " + shortCircuitLocalReads);
+      LOG.info("Short circuit read is " + shortCircuitLocalReads); // @CPSC438
     }
   }
 
@@ -712,8 +712,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       permission = FsPermission.getDefault();
     }
     FsPermission masked = permission.applyUMask(FsPermission.getUMask(conf));
-    LOG.debug(src + ": masked=" + masked);
-    LOG.info(src + ": masked=" + masked);
+    LOG.debug(src + ": masked=" + masked); 
+    LOG.info(src + ": masked=" + masked); // @CPSC438
     OutputStream result = new DFSOutputStream(src, masked,
         overwrite, createParent, replication, blockSize, progress, buffersize,
         conf.getInt("io.bytes.per.checksum", 512));
@@ -948,9 +948,9 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         // get block MD5
         try {
           if (LOG.isDebugEnabled()) {
-            LOG.debug("write to " + datanodes[j].getName() + ": "
+            LOG.info("write to " + datanodes[j].getName() + ": "
                 + DataTransferProtocol.OP_BLOCK_CHECKSUM +
-                ", block=" + block);
+                ", block=" + block); // @CPSC438
           }
           out.writeShort(DataTransferProtocol.DATA_TRANSFER_VERSION);
           out.write(DataTransferProtocol.OP_BLOCK_CHECKSUM);
@@ -964,10 +964,10 @@ public class DFSClient implements FSConstants, java.io.Closeable {
             if (reply == DataTransferProtocol.OP_STATUS_ERROR_ACCESS_TOKEN
                 && i > lastRetriedIndex) {
               if (LOG.isDebugEnabled()) {
-                LOG.debug("Got access token error in response to OP_BLOCK_CHECKSUM "
+                LOG.info("Got access token error in response to OP_BLOCK_CHECKSUM "
                     + "for file " + src + " for block " + block
                     + " from datanode " + datanodes[j].getName()
-                    + ". Will retry the block once.");
+                    + ". Will retry the block once."); // @CPSC438
               }
               lastRetriedIndex = i;
               done = true; // actually it's not done; but we'll retry
@@ -1004,11 +1004,11 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
           if (LOG.isDebugEnabled()) {
             if (i == 0) {
-              LOG.debug("set bytesPerCRC=" + bytesPerCRC
+              LOG.info("set bytesPerCRC=" + bytesPerCRC
                   + ", crcPerBlock=" + crcPerBlock);
             }
-            LOG.debug("got reply from " + datanodes[j].getName()
-                + ": md5=" + md5);
+            LOG.info("got reply from " + datanodes[j].getName()
+                + ": md5=" + md5); // @CSPC438
           }
         } catch (IOException ie) {
           LOG.warn("src=" + src + ", datanodes[" + j + "].getName()="
@@ -1210,7 +1210,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       permission = FsPermission.getDefault();
     }
     FsPermission masked = permission.applyUMask(FsPermission.getUMask(conf));
-    LOG.debug(src + ": masked=" + masked);
+    LOG.info(src + ": masked=" + masked); // @CPSC438
     try {
       return namenode.mkdirs(src, masked);
     } catch(RemoteException re) {
@@ -1325,7 +1325,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       }
      
       if (daemonCopy != null) {
-        LOG.debug("Wait for lease checker to terminate");
+        LOG.info("Wait for lease checker to terminate"); // @CPSC438
         daemonCopy.join();
       }
     }
@@ -1380,7 +1380,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
           Thread.sleep(1000);
         } catch (InterruptedException ie) {
           if (LOG.isDebugEnabled()) {
-            LOG.debug(this + " is interrupted.", ie);
+            LOG.info(this + " is interrupted.", ie); // @CPSC438
           }
           return;
         }
@@ -1566,10 +1566,10 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         boolean lastPacketInBlock = in.readBoolean();
       
         if (LOG.isDebugEnabled()) {
-          LOG.debug("DFSClient readChunk got seqno " + seqno +
+          LOG.info("DFSClient readChunk got seqno " + seqno +
                     " offsetInBlock " + offsetInBlock +
                     " lastPacketInBlock " + lastPacketInBlock +
-                    " packetLen " + packetLen);
+                    " packetLen " + packetLen); // @CPSC438
         }
         
         int dataLen = in.readInt();
@@ -1777,8 +1777,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         out.flush();
       } catch (IOException e) {
         // its ok not to be able to send this.
-        LOG.debug("Could not write to datanode " + sock.getInetAddress() +
-                  ": " + e.getMessage());
+        LOG.info("Could not write to datanode " + sock.getInetAddress() +
+                  ": " + e.getMessage()); // @CPSC438
       }
     }
   }
@@ -1890,7 +1890,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         last.getBlock().setNumBytes(newBlockSize);
         long newlength = newInfo.getFileLength() + delta;
         newInfo.setFileLength(newlength);
-        LOG.debug("DFSClient setting last block " + last + " to length "
+        LOG.info("DFSClient setting last block " + last + " to length "
             + newBlockSize + " filesize is now " + newInfo.getFileLength());
       } catch (IOException e) {
         if (e.getMessage().startsWith(
@@ -1900,10 +1900,10 @@ public class DFSClient implements FSConstants, java.io.Closeable {
           // We're talking to a server that doesn't implement HDFS-200.
           serverSupportsHdfs200 = false;
         } else {
-          LOG.debug("DFSClient file " + src
+          LOG.info("DFSClient file " + src
               + " is being concurrently append to" + " but datanode "
               + primaryNode.getHostName() + " probably does not have block "
-              + last.getBlock());
+              + last.getBlock()); // @CPSC438
         }
       }
     }
@@ -2110,7 +2110,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
             LOG.warn("Failed to connect to " + targetAddr
                 + ", add to deadNodes and continue" + ex);
             if (LOG.isDebugEnabled()) {
-              LOG.debug("Connection failure", ex);
+              LOG.info("Connection failure", ex); // @CPSC438
             }
             // Put chosen node into dead list, continue
             addToDeadNodes(chosenNode);
@@ -2352,7 +2352,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
             LOG.warn("Failed to connect to " + targetAddr + " for file " + src
                 + " for block " + block.getBlock() + ":" + e);
             if (LOG.isDebugEnabled()) {
-              LOG.debug("Connection failure ", e);
+              LOG.info("Connection failure ", e); // @CPSC438
             }
           }
         } finally {
@@ -2449,9 +2449,9 @@ public class DFSClient implements FSConstants, java.io.Closeable {
               done = true;
             }
           } catch (IOException e) {//make following read to retry
-            LOG.debug("Exception while seek to " + targetPos + " from "
+            LOG.info("Exception while seek to " + targetPos + " from "
                       + currentBlock +" of " + src + " from " + currentNode + 
-                      ": " + StringUtils.stringifyException(e));
+                      ": " + StringUtils.stringifyException(e)); // @CPSC438
           }
         }
       }
@@ -2827,7 +2827,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
               // get new block from namenode.
               if (blockStream == null) {
-                LOG.debug("Allocating new block");
+                LOG.info("Allocating new block"); // @CPSC438
                 nodes = nextBlockOutputStream(src); 
                 this.setName("DataStreamer for file " + src +
                              " block " + block);
@@ -2857,7 +2857,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
               
               // write out data to remote datanode
               blockStream.write(buf.array(), buf.position(), buf.remaining());
-              
+              LOG.info("Writing data from DFSClient to T-Pain");
               if (one.lastPacketInBlock) {
                 blockStream.writeInt(0); // indicate end-of-block 
               }
@@ -2865,11 +2865,11 @@ public class DFSClient implements FSConstants, java.io.Closeable {
               lastPacket = System.currentTimeMillis();
 
               if (LOG.isDebugEnabled()) {
-                LOG.debug("DataStreamer block " + block +
+                LOG.info("DataStreamer block " + block +
                           " wrote packet seqno:" + one.seqno +
                           " size:" + buf.remaining() +
                           " offsetInBlock:" + one.offsetInBlock + 
-                          " lastPacketInBlock:" + one.lastPacketInBlock);
+                          " lastPacketInBlock:" + one.lastPacketInBlock); // @CPSC438
               }
             } catch (Throwable e) {
               LOG.warn("DataStreamer Exception: " + 
@@ -2895,7 +2895,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                 }
               }
             }
-            LOG.debug("Closing old block " + block);
+            LOG.info("Closing old block " + block); // @CPSC438
             this.setName("DataStreamer for file " + src);
 
             response.close();        // ignore all errors in Response
@@ -2921,8 +2921,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
           // This is used by unit test to trigger race conditions.
           if (artificialSlowdown != 0 && clientRunning) {
-            LOG.debug("Sleeping for artificial slowdown of " +
-                artificialSlowdown + "ms");
+            LOG.info("Sleeping for artificial slowdown of " +
+                artificialSlowdown + "ms"); // @CPSC438
             try { 
               Thread.sleep(artificialSlowdown); 
             } catch (InterruptedException e) {}
@@ -2968,7 +2968,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
             // read an ack from the pipeline
             ack.readFields(blockReplyStream);
             if (LOG.isDebugEnabled()) {
-              LOG.debug("DFSClient for block " + block + " " + ack);
+              LOG.info("DFSClient for block " + block + " " + ack); // @CPSC438
             }
             
             // processes response status from all datanodes.
@@ -3221,7 +3221,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       this.blockReplication = replication;
       this.progress = progress;
       if (progress != null) {
-        LOG.debug("Set non-null progress callback on DFSOutputStream "+src);
+        LOG.info("Set non-null progress callback on DFSOutputStream "+src); // @CPSC438
       }
       
       if ( bytesPerChecksum < 1 || blockSize % bytesPerChecksum != 0) {
@@ -3256,6 +3256,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                                        NSQuotaExceededException.class,
                                        DSQuotaExceededException.class);
       }
+      LOG.info("Namenode should have created file in namesystem by now.");
       streamer.start();
     }
   
@@ -3342,10 +3343,10 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       chunksPerPacket = Math.max((psize - n + chunkSize-1)/chunkSize, 1);
       packetSize = n + chunkSize*chunksPerPacket;
       if (LOG.isDebugEnabled()) {
-        LOG.debug("computePacketChunkSize: src=" + src +
+        LOG.info("computePacketChunkSize: src=" + src +
                   ", chunkSize=" + chunkSize +
                   ", chunksPerPacket=" + chunksPerPacket +
-                  ", packetSize=" + packetSize);
+                  ", packetSize=" + packetSize); // @CPSC438
       }
     }
 
@@ -3411,7 +3412,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       String firstBadLink = "";
       if (LOG.isDebugEnabled()) {
         for (int i = 0; i < nodes.length; i++) {
-          LOG.debug("pipeline = " + nodes[i].getName());
+          LOG.info("pipeline = " + nodes[i].getName()); // @CPSC438
         }
       }
 
@@ -3420,14 +3421,16 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
       boolean result = false;
       try {
-        LOG.debug("Connecting to " + nodes[0].getName());
+        for(int i = 0; i < nodes.length; i++) {
+          LOG.info(i + ": Connecting to ]=> " + nodes[i].getName()); // @CPSC438
+        }
         InetSocketAddress target = NetUtils.createSocketAddr(nodes[0].getName());
         s = socketFactory.createSocket();
         timeoutValue = 3000 * nodes.length + socketTimeout;
         NetUtils.connect(s, target, timeoutValue);
         s.setSoTimeout(timeoutValue);
         s.setSendBufferSize(DEFAULT_DATA_SOCKET_SIZE);
-        LOG.debug("Send buf size " + s.getSendBufferSize());
+        LOG.info("Send buf size " + s.getSendBufferSize()); // @CPSC438
         long writeTimeout = HdfsConstants.WRITE_TIMEOUT_EXTENSION * nodes.length +
                             datanodeWriteTimeout;
 
@@ -3598,12 +3601,12 @@ public class DFSClient implements FSConstants, java.io.Closeable {
           currentPacket = new Packet(packetSize, chunksPerPacket, 
                                      bytesCurBlock);
           if (LOG.isDebugEnabled()) {
-            LOG.debug("DFSClient writeChunk allocating new packet seqno=" + 
+            LOG.info("DFSClient writeChunk allocating new packet seqno=" + 
                       currentPacket.seqno +
                       ", src=" + src +
                       ", packetSize=" + packetSize +
                       ", chunksPerPacket=" + chunksPerPacket +
-                      ", bytesCurBlock=" + bytesCurBlock);
+                      ", bytesCurBlock=" + bytesCurBlock); // @CPSC438
           }
         }
 
@@ -3617,12 +3620,12 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         if (currentPacket.numChunks == currentPacket.maxChunks ||
             bytesCurBlock == blockSize) {
           if (LOG.isDebugEnabled()) {
-            LOG.debug("DFSClient writeChunk packet full seqno=" +
+            LOG.info("DFSClient writeChunk packet full seqno=" +
                       currentPacket.seqno +
                       ", src=" + src +
                       ", bytesCurBlock=" + bytesCurBlock +
                       ", blockSize=" + blockSize +
-                      ", appendChunk=" + appendChunk);
+                      ", appendChunk=" + appendChunk); // @CPSC438
           }
           //
           // if we allocated a new packet because we encountered a block
@@ -3646,8 +3649,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
           computePacketChunkSize(psize, bytesPerChecksum);
         }
       }
-      //LOG.debug("DFSClient writeChunk done length " + len +
-      //          " checksum length " + cklen);
+      LOG.debug("DFSClient writeChunk done length " + len +
+                " checksum length " + cklen);
     }
 
     private synchronized void enqueueCurrentPacket() {

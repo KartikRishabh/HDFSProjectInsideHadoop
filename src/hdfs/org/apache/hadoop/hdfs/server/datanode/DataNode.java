@@ -1441,7 +1441,9 @@ public class DataNode extends Configured
         out.writeByte(DataTransferProtocol.OP_WRITE_BLOCK_CUSTOM);
         out.writeLong(b.getBlockId());
         out.writeLong(b.getGenerationStamp());
-        out.writeInt((b.getOpCode()+1)); // @CPSC438
+        int valueToWrite = b.getOpCode() + 1;
+        LOG.info("Writing opCode " + valueToWrite);
+        out.writeInt((valueToWrite)); // @CPSC438
         out.writeInt(0);           // no pipelining
         out.writeBoolean(false);   // not part of recovery
         Text.writeString(out, ""); // client

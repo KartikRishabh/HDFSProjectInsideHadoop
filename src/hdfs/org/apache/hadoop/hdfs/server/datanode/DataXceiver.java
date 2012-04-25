@@ -265,8 +265,10 @@ class DataXceiver implements Runnable, FSConstants {
     Block block = new Block(in.readLong(), 
         dataXceiverServer.estimateBlockSize, in.readLong());
     // @CPSC438
-    if (checkOpCode)
+    if (checkOpCode) {
       block.setOpCode(in.readInt());
+      LOG.info("Just read opCode: " +  block.getOpCode());
+    }
     LOG.info("Receiving block " + block + 
              " src: " + remoteAddress +
              " dest: " + localAddress +
@@ -354,8 +356,12 @@ class DataXceiver implements Runnable, FSConstants {
 
           // Write header: Copied from DFSClient.java!
           mirrorOut.writeShort( DataTransferProtocol.DATA_TRANSFER_VERSION );
-          mirrorOut.write( DataTransferProtocol.OP_WRITE_BLOCK );
-          mirrorOut.writeLong( block.getBlockId() );
+          if (checkOpCode) { // @CPSC438
+            mirrorOut.write( DataTransferProtocol.OP_WRITE_BLOCK_CUSTOM );
+          } else {
+             mirrorOut.write( DataTransferProtocol.OP_WRITE_BLOCK ); 
+          }
+          mirrorOut.writeLong( block.getBlockId()+1 );  
           mirrorOut.writeLong( block.getGenerationStamp() );
           mirrorOut.writeInt( pipelineSize );
           mirrorOut.writeBoolean( isRecovery );

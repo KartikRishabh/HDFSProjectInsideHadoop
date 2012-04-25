@@ -508,6 +508,10 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
       DataOutputStream replyOut,  // output to previous datanode
       String mirrAddr, BlockTransferThrottler throttlerArg,
       int numTargets) throws IOException {
+      
+      
+      LOG.trace("Receive Block");
+      LOG.info("Received block from datanode");
 
       mirrorOut = mirrOut;
       mirrorAddr = mirrAddr;
