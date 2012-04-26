@@ -31,6 +31,7 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.fs.ChecksumException;
+import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.FSConstants;
 import org.apache.hadoop.io.IOUtils;
@@ -82,12 +83,29 @@ class BlockSender implements java.io.Closeable, FSConstants {
               boolean corruptChecksumOk, boolean chunkOffsetOK,
               boolean verifyChecksum, DataNode datanode) throws IOException {
     this(block, startOffset, length, corruptChecksumOk, chunkOffsetOK,
-         verifyChecksum, datanode, null);
+         verifyChecksum, datanode, null, false); // @CPSC438
+  }
+  
+  BlockSender(Block block, long startOffset, long length,
+              boolean corruptChecksumOk, boolean chunkOffsetOK,
+              boolean verifyChecksum, DataNode datanode, boolean reduceBlock) 
+              throws IOException {
+    this(block, startOffset, length, corruptChecksumOk, chunkOffsetOK,
+         verifyChecksum, datanode, null, reduceBlock); // @CPSC438
+  }
+  
+  BlockSender(Block block, long startOffset, long length,
+              boolean corruptChecksumOk, boolean chunkOffsetOK,
+              boolean verifyChecksum, DataNode datanode, String clientTraceFmt) 
+              throws IOException {
+    this(block, startOffset, length, corruptChecksumOk, chunkOffsetOK,
+          verifyChecksum, datanode, clientTraceFmt, false); // @CPSC438
   }
 
   BlockSender(Block block, long startOffset, long length,
               boolean corruptChecksumOk, boolean chunkOffsetOK,
-              boolean verifyChecksum, DataNode datanode, String clientTraceFmt)
+              boolean verifyChecksum, DataNode datanode, String clientTraceFmt, 
+              boolean reduceBlock) // @CPSC438
       throws IOException {
     try {
       this.block = block;
@@ -171,7 +189,13 @@ class BlockSender implements java.io.Closeable, FSConstants {
       }
       seqno = 0;
 
-      blockIn = datanode.data.getBlockInputStream(block, offset); // seek to offset
+      if(reduceBlock) {
+        LOG.info("Reduce Block ======================================");
+        blockIn = DFSUtil.blockReduce(datanode.data.getBlockInputStream(block, offset), block.getSortedCol(), "2000", "3000");
+      } else {
+        // @CPSC438 : Crucial line follows (previously written)
+        blockIn = datanode.data.getBlockInputStream(block, offset); // seek to offset
+      }
       memoizedBlock = new MemoizedBlock(blockIn, blockLength, datanode.data, block);
     } catch (IOException ioe) {
       IOUtils.closeStream(this);
@@ -272,7 +296,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
     int checksumLen = numChunks * checksumSize;
     byte[] buf = pkt.array();
     
-    if (checksumSize > 0 && checksumIn != null) {
+    /*if (checksumSize > 0 && checksumIn != null) {
       try {
         checksumIn.readFully(buf, checksumOff, checksumLen);
       } catch (IOException e) {
@@ -290,7 +314,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
           throw e;
         }
       }
-    }
+    }*/
     
     int dataOff = checksumOff + checksumLen;
     
@@ -307,10 +331,14 @@ class BlockSender implements java.io.Closeable, FSConstants {
           checksum.reset();
           int dLen = Math.min(dLeft, bytesPerChecksum);
           checksum.update(buf, dOff, dLen);
+          
+          //@CPSC438 ignore checksums
+         /*
           if (!checksum.compare(buf, cOff)) {
             throw new ChecksumException("Checksum failed at " + 
                                         (offset + len - dLeft), len);
           }
+          */
           dLeft -= dLen;
           dOff += dLen;
           cOff += checksumSize;

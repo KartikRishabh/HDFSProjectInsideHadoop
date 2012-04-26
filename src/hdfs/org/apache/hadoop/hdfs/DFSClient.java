@@ -3421,9 +3421,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
       boolean result = false;
       try {
-        for(int i = 0; i < nodes.length; i++) {
-          LOG.info(i + ": Connecting to ]=> " + nodes[i].getName()); // @CPSC438
-        }
+          LOG.info(": Connecting to ]=> " + nodes[0].getName() + " " +
+          nodes[0].getNetworkLocation()); // @CPSC438
         InetSocketAddress target = NetUtils.createSocketAddr(nodes[0].getName());
         s = socketFactory.createSocket();
         timeoutValue = 3000 * nodes.length + socketTimeout;
@@ -3443,9 +3442,10 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         blockReplyStream = new DataInputStream(NetUtils.getInputStream(s));
 
         out.writeShort( DataTransferProtocol.DATA_TRANSFER_VERSION );
-        out.write( DataTransferProtocol.OP_WRITE_BLOCK );
-        out.writeLong( block.getBlockId() );
+        out.write( DataTransferProtocol.OP_WRITE_BLOCK_CUSTOM );
+        out.writeLong( block.getBlockId() );  
         out.writeLong( block.getGenerationStamp() );
+        out.writeInt(block.getOpCode());     // @CPSC438
         out.writeInt( nodes.length );
         out.writeBoolean( recoveryFlag );       // recovery flag
         Text.writeString( out, client );

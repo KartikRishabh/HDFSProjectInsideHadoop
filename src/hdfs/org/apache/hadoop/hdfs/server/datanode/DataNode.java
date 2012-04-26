@@ -1430,8 +1430,9 @@ public class DataNode extends Configured
         out = new DataOutputStream(new BufferedOutputStream(baseStream, 
                                                             SMALL_BUFFER_SIZE));
 
+        LOG.info("Creating our own BlockSender");
         blockSender = new BlockSender(b, 0, b.getNumBytes(), false, false, false, 
-            datanode);
+            datanode, true); // @CPSC438
         DatanodeInfo srcNode = new DatanodeInfo(dnRegistration);
 
         //

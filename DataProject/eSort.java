@@ -15,12 +15,12 @@ public class eSort {
 
 		switch (cdt) {
 			case STRING:
-				pr = Runtime.getRuntime().exec("/Users/aayushu/Desktop/sort.sh " + fileName + " " + column + " 0");
+				pr = Runtime.getRuntime().exec("/home/accts/krv6/bin/sort.sh " + fileName + " " + column + " 0");
 				pr.waitFor();
 				 
 			break;
 			case INTEGER:
-				pr = Runtime.getRuntime().exec("/Users/aayushu/Desktop/sort.sh " + fileName + " " + column + " 1");
+				pr = Runtime.getRuntime().exec("/home/accts/krv6/bin/sort.sh " +  fileName + " " + column + " 1");
 				pr.waitFor();
 			break;
 		}

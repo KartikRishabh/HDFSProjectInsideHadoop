@@ -361,8 +361,11 @@ class DataXceiver implements Runnable, FSConstants {
           } else {
              mirrorOut.write( DataTransferProtocol.OP_WRITE_BLOCK ); 
           }
-          mirrorOut.writeLong( block.getBlockId()+1 );  
-          mirrorOut.writeLong( block.getGenerationStamp() );
+          mirrorOut.writeLong(block.getBlockId()); 
+          mirrorOut.writeLong(block.getGenerationStamp());
+          if (checkOpCode) { // @CPSC48
+            mirrorOut.writeInt(block.getOpCode()+1);  
+          } 
           mirrorOut.writeInt( pipelineSize );
           mirrorOut.writeBoolean( isRecovery );
           Text.writeString( mirrorOut, client );
