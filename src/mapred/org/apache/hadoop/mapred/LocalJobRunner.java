@@ -108,6 +108,8 @@ class LocalJobRunner implements JobSubmissionProtocol {
       this.systemJobDir = new Path(jobSubmitDir);
       this.systemJobFile = new Path(systemJobDir, "job.xml");
       this.id = jobid;
+      
+      LOG.info("New Job: " + systemJobDir + ", " + systemJobFile + ", " + jobid);
 
       this.localFs = FileSystem.getLocal(conf);
 
@@ -135,6 +137,9 @@ class LocalJobRunner implements JobSubmissionProtocol {
       }
       // Setup the symlinks for the distributed cache.
       TaskRunner.setupWorkDir(conf, new File(localJobDir.toUri()).getAbsoluteFile());
+
+      LOG.info("Local Job Runner, Job()");
+      LOG.info("About to call localFS.create(localJobFile)");
 
       // Write out configuration file.  Instead of copying it from
       // systemJobFile, we re-write it, since setup(), above, may have
@@ -169,6 +174,7 @@ class LocalJobRunner implements JobSubmissionProtocol {
     @SuppressWarnings("unchecked")
     @Override
     public void run() {
+      LOG.info("LocalJobRunner is locally running jobs.");// @CPSC438;
       JobID jobId = profile.getJobID();
       JobContext jContext = new JobContext(conf, jobId);
       OutputCommitter outputCommitter = job.getOutputCommitter();
@@ -201,7 +207,8 @@ class LocalJobRunner implements JobSubmissionProtocol {
             MapOutputFile mapOutput = new MapOutputFile();
             mapOutput.setConf(localConf);
             mapOutputFiles.put(mapId, mapOutput);
-
+            
+            LOG.info("Job file set to " + localJobFile.toString());
             map.setJobFile(localJobFile.toString());
             localConf.setUser(map.getUser());
             map.localizeConfiguration(localConf);
@@ -209,6 +216,7 @@ class LocalJobRunner implements JobSubmissionProtocol {
             map_tasks += 1;
             myMetrics.launchMap(mapId);
             queueMetrics.launchMap(mapId);
+            LOG.info("About to call map.run()");
             map.run(localConf, this);
             myMetrics.completeMap(mapId);
             queueMetrics.completeMap(mapId);
@@ -432,6 +440,7 @@ class LocalJobRunner implements JobSubmissionProtocol {
   public JobStatus submitJob(JobID jobid, String jobSubmitDir, 
                              Credentials credentials) 
   throws IOException {
+    LOG.info("LocalJobRunner: submitJob()");
     Job job = new Job(jobid, jobSubmitDir);
     job.job.setCredentials(credentials);
     return job.status;

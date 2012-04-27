@@ -31,6 +31,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -75,6 +76,9 @@ import org.apache.hadoop.util.Progress;
 import org.apache.hadoop.util.QuickSort;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
+
+// @CPSC438
+import org.apache.hadoop.hdfs.DFSUtil;
 
 /** A Map task. */
 class MapTask extends Task {
@@ -344,7 +348,7 @@ class MapTask extends Task {
   public void run(final JobConf job, final TaskUmbilicalProtocol umbilical) 
     throws IOException, ClassNotFoundException, InterruptedException {
     this.umbilical = umbilical;
-
+    LOG.info("Map Task Run section");
     // start thread that will handle communication with parent
     TaskReporter reporter = new TaskReporter(getProgress(), umbilical,
         jvmContext);
@@ -376,7 +380,21 @@ class MapTask extends Task {
   @SuppressWarnings("unchecked")
   private <T> T getSplitDetails(Path file, long offset)
    throws IOException {
+
+    /**
+     * @CPSC438: No rainbows. Go away.
+     */
     FileSystem fs = file.getFileSystem(conf);
+    // @CPSC438
+    //FSDataInputStream inFile = fs.open(file);
+    /*LOG.info("]]]]]]]]]]]BlockReduce[[[[[[[[[[[[[[[");
+    File reducedFile = DFSUtil.blockReduce(file.toUri().getPath(), 4, "above", "below");
+    
+    FSDataInputStream inFile = fs.open(new Path(reducedFile.toURI()));
+    if (inFile == null) { // If there's an error in blockReduce
+      LOG.info("Returned null in blockReduce()");
+      inFile = fs.open(file);
+    }*/
     FSDataInputStream inFile = fs.open(file);
     inFile.seek(offset);
     String className = Text.readString(inFile);

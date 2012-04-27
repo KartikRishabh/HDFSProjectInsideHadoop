@@ -469,8 +469,10 @@ public class JobClient extends Configured implements MRConstants, Tool  {
     this.ugi = UserGroupInformation.getCurrentUser();
     if ("local".equals(tracker)) {
       conf.setNumMapTasks(1);
+      LOG.info("Local Runner\n"); // @CPSC438
       this.jobSubmitClient = new LocalJobRunner(conf);
     } else {
+      LOG.info("RPCProxy\n"); // @CPSC438
       this.jobSubmitClient = createRPCProxy(JobTracker.getAddress(conf), conf);
     }        
   }
@@ -861,7 +863,8 @@ public class JobClient extends Configured implements MRConstants, Tool  {
         JobStatus status = null;
         try {
           populateTokenCache(jobCopy, jobCopy.getCredentials());
-
+          // @CPSC438
+          LOG.info("submitJobInternal() in JobClient.java (above copy&Configure)");
           copyAndConfigureFiles(jobCopy, submitJobDir);
 
           // get delegation token for the dir
@@ -918,6 +921,7 @@ public class JobClient extends Configured implements MRConstants, Tool  {
           // Now, actually submit the job (using the submit name)
           //
           printTokens(jobId, jobCopy.getCredentials());
+          LOG.info("Officially submitting job--------------");
           status = jobSubmitClient.submitJob(
               jobId, submitJobDir.toString(), jobCopy.getCredentials());
           JobProfile prof = jobSubmitClient.getJobProfile(jobId);
@@ -976,8 +980,10 @@ public class JobClient extends Configured implements MRConstants, Tool  {
     JobConf jConf = (JobConf)job.getConfiguration();
     int maps;
     if (jConf.getUseNewMapper()) {
+      LOG.info("JobClient: writeNewSplits()");   // @CPSC438
       maps = writeNewSplits(job, jobSubmitDir);
     } else {
+      LOG.info("JobClient: writeOldSplits()"); // @CPSC438
       maps = writeOldSplits(jConf, jobSubmitDir);
     }
     return maps;
@@ -1257,8 +1263,11 @@ public class JobClient extends Configured implements MRConstants, Tool  {
    * @throws IOException if the job fails
    */
   public static RunningJob runJob(JobConf job) throws IOException {
+    // @CPSC438
+    LOG.info("We know this is the first entry point");
     JobClient jc = new JobClient(job);
     RunningJob rj = jc.submitJob(job);
+    
     try {
       if (!jc.monitorAndPrintJob(job, rj)) {
         LOG.info("Job Failed: " + rj.getFailureInfo());

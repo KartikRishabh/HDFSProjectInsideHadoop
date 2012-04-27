@@ -164,6 +164,7 @@ class DataXceiver implements Runnable, FSConstants {
     //
     // Read in the header
     //
+    LOG.info("Something connected to DataNode to perform readBlock()");
     long blockId = in.readLong();          
     Block block = new Block( blockId, 0 , in.readLong());
 
@@ -204,7 +205,7 @@ class DataXceiver implements Runnable, FSConstants {
     try {
       try {
         blockSender = new BlockSender(block, startOffset, length,
-            true, true, false, datanode, clientTraceFmt);
+            true, true, false, datanode, clientTraceFmt, true); // @CPSC438
       } catch(IOException e) {
         out.writeShort(DataTransferProtocol.OP_STATUS_ERROR);
         throw e;

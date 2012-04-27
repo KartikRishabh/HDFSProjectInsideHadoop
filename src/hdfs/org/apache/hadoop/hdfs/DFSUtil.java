@@ -34,6 +34,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
@@ -165,6 +166,7 @@ public class DFSUtil {
 
     LOG.info("Filename: " + filename);
     LOG.info("S Column: " + column);
+    column = 4;
   
     try {
 		  Process pr = null;
@@ -175,14 +177,32 @@ public class DFSUtil {
     
       BufferedReader in = null;
       in = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-                              
+      
+      String inputLine = in.readLine();
+		  String[] splits;
+      
+      if(inputLine != null) {
+        splits = inputLine.split(",");
+        if(splits.length < column) {
+          inputLine = in.readLine();
+          if (inputLine != null && 
+              inputLine.split(",")[column-1].replaceAll("\\d+", "").length() > 0)
+            cdt = ColDataType.STRING;
+        } else {
+          if (inputLine != null &&
+              inputLine.split(",")[column-1].replaceAll("\\d+", "").length() > 0)
+            cdt = ColDataType.STRING;
+        }
+      }
+           /*                   
 		  String inputLine = in.readLine();
       if(inputLine != null && 
          inputLine.split(",")[column-1].replaceAll("\\d+", "").length() > 0) {
         cdt = ColDataType.STRING;
       }
       in.close();
-		  
+		  */
+		  in.close();
 		  switch (cdt) {
 		    case INTEGER:
 		    	pr = Runtime.getRuntime().exec(runCommand + 1);
@@ -204,131 +224,131 @@ public class DFSUtil {
 	  LOG.info("Bye!");
 	}
 	
-	/*
-   * @CPSC438
-   * Takes a filename and sorts it, by writing out to different files 
-   * and then merges them simultaneously
-   * Calls an external sort progam.
-   * Also takes a separator to indicate how to find columns, and int
-   * to indicate which column to sort. 
-   */
-  public static void blockReduce(String filename, int column) {
-
-    LOG.info("Filename: " + filename);
-    LOG.info("S Column: " + column);
-  
-    try {
-		  Process pr = null;
-		  String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
-		                    column + " ";
-		                    
-		  ColDataType cdt = ColDataType.INTEGER;
-    
-      BufferedReader in = null;
-      in = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-                              
-		  String inputLine = in.readLine();
-      if(inputLine != null && 
-         inputLine.split(",")[column-1].replaceAll("\\d+", "").length() > 0) {
-        cdt = ColDataType.STRING;
-      }
-      in.close();
-		  
-		  switch (cdt) {
-		    case INTEGER:
-		    	pr = Runtime.getRuntime().exec(runCommand + 1);
-			   	pr.waitFor();
-		   	  break;
-		    	
-		   	case STRING:
-		   	default:
-		   		pr = Runtime.getRuntime().exec(runCommand + 0);
-			   	pr.waitFor();
-			   break;
-		  }
-		  LOG.info("Really, trully, did finish sorting");
-		}
-		catch(Exception e) {
-		  LOG.info("What the hell is going on!");
-		  e.printStackTrace();
-		}
-	  LOG.info("Bye!");
+	public static boolean processText (ArrayList<String> lines, int col, 
+	                                     String startValue, String endValue, 
+	                                     PrintWriter out) throws Exception {
+	  String target;
+	  String line;
+	  String[] splits;
+	  int size = lines.size();
+	
+	  line = lines.get(size-1);
+	  splits = line.split(",");
+	  if (splits.length >= col) {
+	    target = splits[col-1];
+	    if (target.compareTo(startValue) < 0) {
+	      LOG.info(lines);
+        lines.clear();  
+	      return true;
+	    }
+	  } 
+	  
+	  for(int i = 0; i < size; i++) {
+	    line = lines.get(i);
+	    splits = line.split(",");
+	    if (splits.length < col) {
+	       out.print(line);
+	       continue;
+	    } 
+	    target = splits[col-1];
+	    if(target.compareTo(startValue) >= 0 && 
+	        target.compareTo(endValue) <= 0) {
+	      out.println(line);
+	      continue;
+	    }
+	    if (target.compareTo(endValue) > 0) {
+        lines.clear();
+	      return false;
+	    } 
+	  }
+	  lines.clear();
+	  return true;
+	}
+	
+	public static void processNumber (ArrayList<String> lines, int col, long startValue, long endValue) {
+	  
 	}
 	
 	public static InputStream blockReduce(InputStream is, int col, 
-																          String startValue, String endValue) {      
+                                   String startValue, String endValue) {      
 		
 		LOG.info("Block Reduce");														          
     
     try {  
       File outFile = new File(System.currentTimeMillis() + "_" + col + (int)(10000*Math.random()));
+      LOG.info("OUTFILE: " + outFile.getAbsolutePath());
 		
 		  ColDataType cdt = ColDataType.INTEGER;
       
       BufferedReader in = null;
-      in = new BufferedReader(new InputStreamReader(is));
-      in.mark(512);      // @CPSC438 Marked, 512 chars since we're assuming no line > 512 chars
+    /*  in = new BufferedReader(new FileReader(path));//InputStreamReader(is));
                                 
 		  String inputLine = in.readLine();
-      if(inputLine != null && 
-         inputLine.split(",")[col-1].replaceAll("\\d+", "").length() > 0) {
-        cdt = ColDataType.STRING;
-        in.reset();
+		  String[] splits;
+
+      if(inputLine != null) {
+        splits = inputLine.split(",");
+        if(splits.length < col) {
+          inputLine = in.readLine();
+          if (inputLine != null && 
+              inputLine.split(",")[col-1].replaceAll("\\d+", "").length() > 0)
+            cdt = ColDataType.STRING;
+        } else {
+          if (inputLine != null &&
+              inputLine.split(",")[col-1].replaceAll("\\d+", "").length() > 0)
+            cdt = ColDataType.STRING;
+        }
       }
 		  else { 
-        in.reset();
-			  return blockReduce(is, col, Long.parseLong(startValue), Long.parseLong(endValue));
+		    in.close();
+			  return blockReduce(path, col, Long.parseLong(startValue), Long.parseLong(endValue));
 		  }
+		  in.close();
+		  */
 
-		  in = new BufferedReader(new InputStreamReader(is));
+		  in = new BufferedReader(new InputStreamReader(is));//FileReader(path));
 		  PrintWriter out = new PrintWriter(outFile.getAbsoluteFile());
 		
 		  ArrayList<String> lines = new ArrayList<String>();
-		  inputLine = "";
+		  String inputLine = "";
+		  String[] splits;
 		
 		  int count = 0;
 		  int i;
 		  String target;
-		  while ((inputLine = in.readLine())!=null && count < LINES_TO_READ) {
-			  lines.add(inputLine);
-			  if(count == LINES_TO_READ-1) {
-				  target = inputLine.split(",")[col-1];
-				  if (target.compareTo(startValue) >= 0 &&
-						  target.compareTo(endValue) <= 0) {
-					  out.println(inputLine);
-					  for(i = LINES_TO_READ-2; i >= 0; i--) {
-						  inputLine = lines.get(i);
-						  target = inputLine.split(",")[col-1];
-						  if (target.compareTo(startValue) >= 0 &&
-								  target.compareTo(endValue) <= 0)
-							  out.println(inputLine);
-						  else if (target.compareTo(startValue) < 0)
-							  break;
-					  }
-				  } else if (target.compareTo(endValue) > 0) {
-					  break;
-				  }
-				  count=-1;
-				  lines.clear();
-			  }
-			  count++;
+		  
+		  while ((inputLine = in.readLine()) != null) {
+		    out.println(inputLine);
+		    /*if(inputLine.indexOf(",") == -1)
+		      out.println(inputLine);
+		    else {
+		      lines.add(inputLine);
+		      break;
+		    }*/
 		  }
-		  in.close();
-		  int size = lines.size();
-		  for(i = 0; i < size; i++) {
-			  inputLine = lines.get(i);
-			  target = inputLine.split(",")[col-1];
-			  if (target.compareTo(endValue) <= 0 &&
-					  target.compareTo(startValue) >= 0)
-				  out.println(inputLine);
-			  else if (target.compareTo(endValue) > 0)
-				  break;
+		  /*
+		  while ((inputLine = in.readLine()) != null) {
+		    lines.add(inputLine);
+		    if (count == LINES_TO_READ - 1) {
+		      if (!processText(lines, col, startValue, endValue, out)) {
+		        break;
+		      }
+		      count = 0;
+		    }
+		    else {
+		      count++;
+		    }
 		  }
+		  processText(lines, col, startValue, endValue, out); 
+		  */
+      in.close();
 		  out.close();
-		  return outFile.toURL().openStream();
+		  LOG.info("Really, truly did reduce blocks");
+		  return is;//outFile.toURL().openStream();
 		} catch (Exception e) {
+		  e.printStackTrace();
 		  LOG.info(e.toString());
-		  return is;
+		  return is;//is;
 		}
 	}
 
@@ -337,7 +357,7 @@ public class DFSUtil {
    * Take a block and only send portions of the block that are relavent
    * to the query. 
    */
-	public static InputStream blockReduce(InputStream is, int col, 
+	/*public static File blockReduce(String path, int col, 
 																 long startValue, long endValue) {
 
     //LOG.info("Filename: " + filename);
@@ -348,55 +368,107 @@ public class DFSUtil {
 	  try {
 	    File outFile = new File(System.currentTimeMillis() + "_" + col + (int)(10000*Math.random()));	
 	    
-	    BufferedReader in = new BufferedReader(new InputStreamReader(is));
+	    BufferedReader in = new BufferedReader(new FileReader(path));
 	    
   		PrintWriter out = new PrintWriter(new FileWriter(outFile.getAbsoluteFile()));
 		
 	  	ArrayList<String> lines = new ArrayList<String>();
 	  	String inputLine = "";
+	  	String[] splits;
 		
 	  	int count = 0;
 	  	int i;
 	  	long target;
 	  	while ((inputLine = in.readLine())!=null && count < LINES_TO_READ) {
-	  		lines.add(inputLine);
-	  		if(count == LINES_TO_READ-1) {
-	  			target = Long.parseLong(inputLine.split(",")[col-1]);
-	  			if (target >= startValue && target <= endValue) {
-	  				out.println(inputLine);
-	  				for(i = LINES_TO_READ-2; i >= 0; i--) {
-	  					inputLine = lines.get(i);
-	  					target = Long.parseLong(inputLine.split(",")[col-1]);
-	  					if (target >= startValue && target <= endValue)
-	  						out.println(inputLine);
-	  					else if (target < startValue)
-	  						break;
-	  				}
-	  			} else if (target > endValue) {
-	  				break;
-	  			}
-	  			count=-1;
-    			lines.clear();
-	  		}
-	  		count++;
-	  	}
-	  	in.close();
-	  	int size = lines.size();
-	  	for(i = 0; i < size; i++) {
-	  		inputLine = lines.get(i);
-	  		target = Long.parseLong(inputLine.split(",")[col-1]);
-	  		if (target <= endValue && target >= startValue)
-	  			out.println(inputLine);
-	  		else if (target > endValue)
-	  			break;
-	  	}
+			  lines.add(inputLine);
+			  if(count == LINES_TO_READ-1) {
+			    splits = inputLine.split(",");
+			    if(splits.length < col) {
+			      out.print(inputLine);
+			    } else {
+			      target = Long.parseLong(splits[col-1]);
+				    if (target >= startValue && 
+						    target <= endValue) {
+					    out.println(inputLine);
+					    for(i = LINES_TO_READ-2; i >= 0; i--) {
+						    inputLine = lines.get(i);
+						    splits = inputLine.split(",");
+						    if(splits.length < col) {
+						      out.print(inputLine);
+						    } else {
+						      target = Long.parseLong(splits[col-1]);
+						      if (target >= startValue &&
+								      target <= endValue) {
+							      out.println(inputLine);
+							      LOG.info(inputLine);
+						      } else if (target < startValue)
+							      break;
+							  }
+					    }
+				    } else if (target > endValue) {
+					    break;
+				    }
+			    }
+				  count=-1;
+				  lines.clear();
+			  }
+			  count++;
+		  }
+		  in.close();
+		  int size = lines.size();
+		  for(i = 0; i < size; i++) {
+			  inputLine = lines.get(i);
+			  splits = inputLine.split(",");
+			  if(splits.length < col)
+			    out.print(inputLine);
+			  else {
+			    target = Long.parseLong(splits[col-1]);
+			    if (target <= endValue &&
+					    target >= startValue)
+				    out.println(inputLine);
+			    else if (target > endValue)
+				    break;
+				}
+		  }
+//	  	while ((inputLine = in.readLine())!=null && count < LINES_TO_READ) {
+//	  		lines.add(inputLine);
+//	  		if(count == LINES_TO_READ-1) {
+//	  			target = Long.parseLong(inputLine.split(",")[col-1]);
+//	  			if (target >= startValue && target <= endValue) {
+//	  				out.println(inputLine);
+//	  				for(i = LINES_TO_READ-2; i >= 0; i--) {
+//	  					inputLine = lines.get(i);
+//	  					target = Long.parseLong(inputLine.split(",")[col-1]);
+//	  					if (target >= startValue && target <= endValue)
+//	  						out.println(inputLine);
+//	  					else if (target < startValue)
+//	  						break;
+//	  				}
+//	  			} else if (target > endValue) {
+//	  				break;
+//	  			}
+//	  			count=-1;
+//    			lines.clear();
+//	  		}
+//	  		count++;
+//	  	}
+//	  	in.close();
+//	  	int size = lines.size();
+//	  	for(i = 0; i < size; i++) {
+//	  		inputLine = lines.get(i);
+//	  		target = Long.parseLong(inputLine.split(",")[col-1]);
+//	  		if (target <= endValue && target >= startValue)
+//	  			out.println(inputLine);
+//	  		else if (target > endValue)
+//	  			break;
+//	  	}
 	  	out.close();
   
     	LOG.info("Really, truly did finish block-reducing");
-	  	return outFile.toURL().openStream();
+	  	return outFile;
 	  } catch(Exception e) {
 	    LOG.info(e.toString());
-	    return is;
+	    return null; //ew DataInputStream(new File(path).toURL().openStream());
 	  }
-	}
+	}*/
 }

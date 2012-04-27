@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.io.FileWriter;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class BlockReduce {
 		}
 
 		in = new BufferedReader(new FileReader(filename));
-		PrintWriter out = new PrintWriter(new FileWriter(filename + "2"));
+		//PrintStream out = System.out;//new PrintWriter(System.out);
 		
 		ArrayList<String> lines = new ArrayList<String>();
 		inputLine = "";
@@ -52,13 +53,13 @@ public class BlockReduce {
 				target = inputLine.split(",")[col-1];
 				if (target.compareTo(startValue) >= 0 &&
 						target.compareTo(endValue) <= 0) {
-					out.println(inputLine);
+					System.out.println(inputLine);
 					for(i = LINES_TO_READ-2; i >= 0; i--) {
 						inputLine = lines.get(i);
 						target = inputLine.split(",")[col-1];
 						if (target.compareTo(startValue) >= 0 &&
 								target.compareTo(endValue) <= 0)
-							out.println(inputLine);
+							System.out.println(inputLine);
 						else if (target.compareTo(startValue) < 0)
 							break;
 					}
@@ -77,11 +78,11 @@ public class BlockReduce {
 			target = inputLine.split(",")[col-1];
 			if (target.compareTo(endValue) <= 0 &&
 					target.compareTo(startValue) >= 0)
-				out.println(inputLine);
+				System.out.println(inputLine);
 			else if (target.compareTo(endValue) > 0)
 				break;
 		}
-		out.close();
+		//out.close();
 	}
 
 	public static void blockReduce(String filename, int col, 

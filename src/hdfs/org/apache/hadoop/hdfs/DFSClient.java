@@ -575,6 +575,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       ) throws IOException {
     checkOpen();
     //    Get block info from namenode
+    LOG.info("Returning new DFSInputStream()");
     return new DFSInputStream(src, buffersize, verifyChecksum);
   }
 
@@ -704,16 +705,16 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                              Progressable progress,
                              int buffersize
                              ) throws IOException {
+                             
+    // @CPSC438 for the next one line(s)
     LOG.info("DFSClient.create()");
-    LOG.info("SRC is: " + src);
-    LOG.info("------------------------------------------------------");
+        
     checkOpen();
     if (permission == null) {
       permission = FsPermission.getDefault();
     }
     FsPermission masked = permission.applyUMask(FsPermission.getUMask(conf));
     LOG.debug(src + ": masked=" + masked); 
-    LOG.info(src + ": masked=" + masked); // @CPSC438
     OutputStream result = new DFSOutputStream(src, masked,
         overwrite, createParent, replication, blockSize, progress, buffersize,
         conf.getInt("io.bytes.per.checksum", 512));
@@ -2067,8 +2068,10 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
         // try reading the block locally. if this fails, then go via
         // the datanode
+        // @CPSC438 Just Kidding
         Block blk = targetBlock.getBlock();
         Token<BlockTokenIdentifier> accessToken = targetBlock.getBlockToken();
+        /*
         if (shouldTryShortCircuitRead(targetAddr)) {
           try {
             blockReader = getLocalBlockReader(conf, src, blk, accessToken,
@@ -2080,7 +2083,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
             shortCircuitLocalReads = false;
           } catch (IOException ex) {
             if (refetchToken > 0 && tokenRefetchNeeded(ex, targetAddr)) {
-              /* Get a new access token and retry. */
+              /* Get a new access token and retry. * /
               refetchToken--;
               fetchBlockAt(target);
               continue;
@@ -2091,6 +2094,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
             }
           }
         }
+        */
 
         try {
           s = socketFactory.createSocket();
@@ -2217,7 +2221,6 @@ public class DFSClient implements FSConstants, java.io.Closeable {
         throw new IOException("Stream closed");
       }
       failures = 0;
-
       if (pos < getFileLength()) {
         int retries = 2;
         while (retries > 0) {
@@ -2827,7 +2830,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
               // get new block from namenode.
               if (blockStream == null) {
-                LOG.info("Allocating new block"); // @CPSC438
+                LOG.info("Getting new block"); // @CPSC438
                 nodes = nextBlockOutputStream(src); 
                 this.setName("DataStreamer for file " + src +
                              " block " + block);
@@ -2857,7 +2860,6 @@ public class DFSClient implements FSConstants, java.io.Closeable {
               
               // write out data to remote datanode
               blockStream.write(buf.array(), buf.position(), buf.remaining());
-              LOG.info("Writing data from DFSClient to T-Pain");
               if (one.lastPacketInBlock) {
                 blockStream.writeInt(0); // indicate end-of-block 
               }
@@ -3421,15 +3423,14 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
       boolean result = false;
       try {
-          LOG.info(": Connecting to ]=> " + nodes[0].getName() + " " +
-          nodes[0].getNetworkLocation()); // @CPSC438
+          LOG.info(": Connecting to ]=> " + nodes[0].getName()); // @CPSC438
         InetSocketAddress target = NetUtils.createSocketAddr(nodes[0].getName());
         s = socketFactory.createSocket();
         timeoutValue = 3000 * nodes.length + socketTimeout;
         NetUtils.connect(s, target, timeoutValue);
         s.setSoTimeout(timeoutValue);
         s.setSendBufferSize(DEFAULT_DATA_SOCKET_SIZE);
-        LOG.info("Send buf size " + s.getSendBufferSize()); // @CPSC438
+
         long writeTimeout = HdfsConstants.WRITE_TIMEOUT_EXTENSION * nodes.length +
                             datanodeWriteTimeout;
 

@@ -153,6 +153,7 @@ public class IOUtils {
       int ret = in.read( buf, off, toRead );
       if ( ret < 0 ) {
         throw new IOException( "Premature EOF from inputStream");
+        //return ; // @CPSC438
       }
       toRead -= ret;
       off += ret;
