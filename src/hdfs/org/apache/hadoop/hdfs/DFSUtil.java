@@ -164,8 +164,7 @@ public class DFSUtil {
    */
   public static void sortFile(String filename, int column) {
 
-    LOG.info("Filename: " + filename);
-    LOG.info("S Column: " + column);
+    LOG.info("Filename: " + filename + " | S Column: " + column);
     column = 4;
   
     try {
@@ -221,7 +220,6 @@ public class DFSUtil {
 		  LOG.info("What the hell is going on!");
 		  e.printStackTrace();
 		}
-	  LOG.info("Bye!");
 	}
 	
 	public static boolean processText (ArrayList<String> lines, int col, 

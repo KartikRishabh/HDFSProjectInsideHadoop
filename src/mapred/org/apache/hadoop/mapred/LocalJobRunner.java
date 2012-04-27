@@ -216,7 +216,14 @@ class LocalJobRunner implements JobSubmissionProtocol {
             map_tasks += 1;
             myMetrics.launchMap(mapId);
             queueMetrics.launchMap(mapId);
+            
+            // @CPSC438
             LOG.info("About to call map.run()");
+            try {
+              Thread.sleep(2000);
+            } catch (Exception e) {
+            }
+            
             map.run(localConf, this);
             myMetrics.completeMap(mapId);
             queueMetrics.completeMap(mapId);

@@ -617,9 +617,6 @@ public class NameNode implements ClientProtocol, DatanodeProtocol,
                              long blockSize
                              ) throws IOException {
     String clientMachine = getClientMachine();
-    // @CPSC438
-    LOG.info("Client Machine: " + clientMachine);
-    LOG.info("Client Name: " + clientName);
     if (stateChangeLog.isDebugEnabled()) {
       stateChangeLog.debug("*DIR* NameNode.create: file "
                          +src+" for "+clientName+" at "+clientMachine);

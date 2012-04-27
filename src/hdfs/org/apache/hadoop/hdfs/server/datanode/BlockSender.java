@@ -189,7 +189,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
       }
       seqno = 0;
 
-      if(reduceBlock) {
+      if(false && reduceBlock) {
         LOG.info("Reduce Block ===========================");
         blockIn = DFSUtil.blockReduce(datanode.data.getBlockInputStream(block, offset), 4, "above", "below");
       } else {

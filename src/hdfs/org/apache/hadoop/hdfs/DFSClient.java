@@ -708,6 +708,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                              
     // @CPSC438 for the next one line(s)
     LOG.info("DFSClient.create()");
+    LOG.info("\t\tsrc: " + src + "\n\t\t\t\treplication: " + replication);
         
     checkOpen();
     if (permission == null) {
@@ -1829,6 +1830,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
     
     DFSInputStream(String src, int buffersize, boolean verifyChecksum
                    ) throws IOException {
+      LOG.info(">>>>>>>>>>>>>Opening DFSInputStream");
       this.verifyChecksum = verifyChecksum;
       this.buffersize = buffersize;
       this.src = src;
@@ -1931,6 +1933,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
      * Return collection of blocks that has already been located.
      */
     synchronized List<LocatedBlock> getAllBlocks() throws IOException {
+      LOG.info("Going to return a block range in DFSInputStream");
       return getBlockRange(0, this.getFileLength());
     }
 
@@ -2830,7 +2833,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
               // get new block from namenode.
               if (blockStream == null) {
-                LOG.info("Getting new block"); // @CPSC438
+                LOG.info("(1/2) DFSOutputStream getting block from NameNode"); // @CPSC438
+                LOG.info("(2/2) Datastreamer for file: " + src + " block " + block);
                 nodes = nextBlockOutputStream(src); 
                 this.setName("DataStreamer for file " + src +
                              " block " + block);
@@ -3258,7 +3262,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                                        NSQuotaExceededException.class,
                                        DSQuotaExceededException.class);
       }
-      LOG.info("Namenode should have created file in namesystem by now.");
+      LOG.info("@CPSC: DFSOutputStream constructor (Namenode creates file)");
       streamer.start();
     }
   

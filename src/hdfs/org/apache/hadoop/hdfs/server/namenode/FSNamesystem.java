@@ -940,13 +940,13 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
                     Server.getRemoteIp(),
                     "open", src, null, null);
     }
-    // @CPSC438
+    /*/ @CPSC438
     List<LocatedBlock> theLocatedBlocks = ret.getLocatedBlocks();
     for(LocatedBlock lb : theLocatedBlocks) {
       DatanodeInfo[] locs = lb.getLocations();
       for(int i = 0; i < locs.length; i++)
         LOG.info("==> " + locs[i].getName());
-    }
+    }*/
     
     return ret;
   }
