@@ -188,14 +188,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
         }
       }
       seqno = 0;
-
-      if(false && reduceBlock) {
-        LOG.info("Reduce Block ===========================");
-        blockIn = DFSUtil.blockReduce(datanode.data.getBlockInputStream(block, offset), 4, "above", "below");
-      } else {
-        // @CPSC438 : Crucial line follows (previously written)
-        blockIn = datanode.data.getBlockInputStream(block, offset); // seek to offset
-      }
+      blockIn = datanode.data.getBlockInputStream(block, offset); // seek to offset
       memoizedBlock = new MemoizedBlock(blockIn, blockLength, datanode.data, block);
     } catch (IOException ioe) {
       IOUtils.closeStream(this);
@@ -296,7 +289,7 @@ class BlockSender implements java.io.Closeable, FSConstants {
     int checksumLen = numChunks * checksumSize;
     byte[] buf = pkt.array();
     
-    /*if (checksumSize > 0 && checksumIn != null) {
+    if (checksumSize > 0 && checksumIn != null) {
       try {
         checksumIn.readFully(buf, checksumOff, checksumLen);
       } catch (IOException e) {
@@ -311,10 +304,10 @@ class BlockSender implements java.io.Closeable, FSConstants {
             Arrays.fill(buf, checksumOff, checksumLen, (byte) 0);
           }
         } else {
-          throw e;
+        //@CPSC438  throw e;
         }
       }
-    }*/
+    }
     
     int dataOff = checksumOff + checksumLen;
     

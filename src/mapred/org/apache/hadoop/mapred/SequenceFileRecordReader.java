@@ -18,6 +18,11 @@
 
 package org.apache.hadoop.mapred;
 
+// @CPSC438
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.hadoop.hdfs.DFSUtil;
+
 import java.io.IOException;
 
 
@@ -29,6 +34,9 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 /** An {@link RecordReader} for {@link SequenceFile}s. */
 public class SequenceFileRecordReader<K, V> implements RecordReader<K, V> {
+
+private static final Log LOG
+    = LogFactory.getLog(LineRecordReader.class.getName());
   
   private SequenceFile.Reader in;
   private long start;
@@ -38,6 +46,12 @@ public class SequenceFileRecordReader<K, V> implements RecordReader<K, V> {
 
   public SequenceFileRecordReader(Configuration conf, FileSplit split)
     throws IOException {
+    
+    /**
+     * @CPSC438
+     */
+    LOG.info("SequenceFileRecordReader Constructor 1");
+    
     Path path = split.getPath();
     FileSystem fs = path.getFileSystem(conf);
     this.in = new SequenceFile.Reader(fs, path, conf);

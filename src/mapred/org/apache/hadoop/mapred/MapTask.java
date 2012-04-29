@@ -77,9 +77,6 @@ import org.apache.hadoop.util.QuickSort;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 
-// @CPSC438
-import org.apache.hadoop.hdfs.DFSUtil;
-
 /** A Map task. */
 class MapTask extends Task {
   /**
@@ -205,6 +202,13 @@ class MapTask extends Task {
       this.reporter = reporter;
       this.split = split;
       conf = job;
+    }
+    
+    /**
+     * @CPSC438
+     */
+    public void whatsMyName() {
+      LOG.info("TrackedRecordReader");
     }
 
     public K createKey() {
@@ -380,21 +384,14 @@ class MapTask extends Task {
   @SuppressWarnings("unchecked")
   private <T> T getSplitDetails(Path file, long offset)
    throws IOException {
+   
+   /**
+    * @CPSC438: No rainbows. Go away. 
+    * Deceptively unclear
+    * Clearly deceptive.
+    */
 
-    /**
-     * @CPSC438: No rainbows. Go away.
-     */
     FileSystem fs = file.getFileSystem(conf);
-    // @CPSC438
-    //FSDataInputStream inFile = fs.open(file);
-    /*LOG.info("]]]]]]]]]]]BlockReduce[[[[[[[[[[[[[[[");
-    File reducedFile = DFSUtil.blockReduce(file.toUri().getPath(), 4, "above", "below");
-    
-    FSDataInputStream inFile = fs.open(new Path(reducedFile.toURI()));
-    if (inFile == null) { // If there's an error in blockReduce
-      LOG.info("Returned null in blockReduce()");
-      inFile = fs.open(file);
-    }*/
     FSDataInputStream inFile = fs.open(file);
     inFile.seek(offset);
     String className = Text.readString(inFile);

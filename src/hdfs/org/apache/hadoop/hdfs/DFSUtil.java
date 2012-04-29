@@ -52,7 +52,8 @@ public class DFSUtil {
    */
   public static String EXTERNAL_SORT = "/home/accts/krv6/bin/sort.sh";
   
-  public static final int LINES_TO_READ = 512;
+  public static final int LINES_TO_READ = 64;
+	public static int COUNT = 0;
 
   /**
    * @CPSC438
@@ -167,6 +168,9 @@ public class DFSUtil {
     LOG.info("Filename: " + filename + " | S Column: " + column);
     column = 4;
   
+		if(true)
+			return ;
+		
     try {
 		  Process pr = null;
 		  String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
@@ -222,13 +226,15 @@ public class DFSUtil {
 		}
 	}
 	
-	public static boolean processText (ArrayList<String> lines, int col, 
-	                                     String startValue, String endValue, 
-	                                     PrintWriter out) throws Exception {
+	public static boolean processText (BufferedReader in, ArrayList<String> lines, int col, 
+	                               String startValue, String endValue, PrintWriter out) throws Exception {
 	  String target;
 	  String line;
 	  String[] splits;
 	  int size = lines.size();
+	  
+	  if(size == 0)
+	    return true;
 	
 	  line = lines.get(size-1);
 	  splits = line.split(",");
@@ -237,6 +243,7 @@ public class DFSUtil {
 	    if (target.compareTo(startValue) < 0) {
 	      LOG.info(lines);
         lines.clear();  
+				in.mark(8192);
 	      return true;
 	    }
 	  } 
@@ -251,11 +258,18 @@ public class DFSUtil {
 	    target = splits[col-1];
 	    if(target.compareTo(startValue) >= 0 && 
 	        target.compareTo(endValue) <= 0) {
-	      out.println(line);
+				if(COUNT == 0) {
+					in.mark(8192);
+					LOG.info("The first valid line is: " + line);
+	      }
+				out.println(line);
+				COUNT++;
 	      continue;
 	    }
 	    if (target.compareTo(endValue) > 0) {
+				LOG.info("The first invalid line is: " + line);
         lines.clear();
+				in.reset();
 	      return false;
 	    } 
 	  }
@@ -267,13 +281,14 @@ public class DFSUtil {
 	  
 	}
 	
-	public static InputStream blockReduce(InputStream is, int col, 
-                                   String startValue, String endValue) {      
+	public static FSDataInputStream blockReduce(int bufferSize, FSDataInputStream is, int col, 
+                                               String startValue, String endValue) {      
 		
 		LOG.info("Block Reduce");														          
     
     try {  
       File outFile = new File(System.currentTimeMillis() + "_" + col + (int)(10000*Math.random()));
+      Path outPath = new Path(outFile.toURI());
       LOG.info("OUTFILE: " + outFile.getAbsolutePath());
 		
 		  ColDataType cdt = ColDataType.INTEGER;
@@ -283,7 +298,6 @@ public class DFSUtil {
                                 
 		  String inputLine = in.readLine();
 		  String[] splits;
-
       if(inputLine != null) {
         splits = inputLine.split(",");
         if(splits.length < col) {
@@ -304,7 +318,11 @@ public class DFSUtil {
 		  in.close();
 		  */
 
+    //  BufferedInputStream bis = new BufferedInputStream(is);
+    
 		  in = new BufferedReader(new InputStreamReader(is));//FileReader(path));
+		  PrintWriter out = new PrintWriter("/home/accts/krv6/Documents/junior/project/HDFSProjectInsideHadoop/" + System.currentTimeMillis() + "_" + (int)(Math.random()*10000));
+		  /*
 		  PrintWriter out = new PrintWriter(outFile.getAbsoluteFile());
 		
 		  ArrayList<String> lines = new ArrayList<String>();
@@ -314,17 +332,26 @@ public class DFSUtil {
 		  int count = 0;
 		  int i;
 		  String target;
+		  int lineCount = 0;
+		  
+		  in.mark(8096);
 		  
 		  while ((inputLine = in.readLine()) != null) {
-		    out.println(inputLine);
-		    /*if(inputLine.indexOf(",") == -1)
+		  
+		    if (lineCount == 2){
 		      out.println(inputLine);
-		    else {
+		      continue;
+		    }
+		      
+		    if(inputLine.indexOf(",") == -1) {
+		      out.println(inputLine);
+		      lineCount++;
+		    } else {
 		      lines.add(inputLine);
 		      break;
-		    }*/
+		    }
 		  }
-		  /*
+		  
 		  while ((inputLine = in.readLine()) != null) {
 		    lines.add(inputLine);
 		    if (count == LINES_TO_READ - 1) {
@@ -338,21 +365,44 @@ public class DFSUtil {
 		    }
 		  }
 		  processText(lines, col, startValue, endValue, out); 
+		  
 		  */
-      in.close();
-		  out.close();
+		  int count = 0;
+		  ArrayList<String> lines = new ArrayList<String>();
+		  String inputLine = "";
+	    in.mark(bufferSize);
+		  while ((inputLine = in.readLine()) != null) {
+		    lines.add(inputLine);
+		    if (count == LINES_TO_READ - 1) {
+		      if (!processText(in, lines, col, startValue, endValue, out)) {
+		        //in.reset();
+		        break;
+		      }
+		      count = 0;
+		    }
+		    else {
+		      count++;
+		    }
+		  }
+		  
+      //in.close();
+		//  out.close();
+      
 		  LOG.info("Really, truly did reduce blocks");
+		  out.close();
+			COUNT=0;
 		  return is;//outFile.toURL().openStream();
 		} catch (Exception e) {
 		  e.printStackTrace();
+			COUNT=0;
 		  LOG.info(e.toString());
-		  return is;//is;
+		  return null;//is;
 		}
 	}
 
   /**
    * @CPSC438
-   * Take a block and only send portions of the block that are relavent
+   * Take a block and only send portions of the block that are relevant
    * to the query. 
    */
 	/*public static File blockReduce(String path, int col, 

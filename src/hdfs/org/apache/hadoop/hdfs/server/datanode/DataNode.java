@@ -1132,15 +1132,15 @@ public class DataNode extends Configured
       return true;
     final BlockCommand bcmd = cmd instanceof BlockCommand? (BlockCommand)cmd: null;
 
-    LOG.info("ACTION: " + cmd.getAction());
-    
     switch(cmd.getAction()) {
     case DatanodeProtocol.DNA_TRANSFER:
+      LOG.info("DNA_TRANSFER"); // @CPSC438
       // Send a copy of a block to another datanode
       transferBlocks(bcmd.getBlocks(), bcmd.getTargets());
       myMetrics.incrBlocksReplicated(bcmd.getBlocks().length);
       break;
     case DatanodeProtocol.DNA_INVALIDATE:
+      LOG.info("DNA_INVALIDATE"); // @CPSC438
       //
       // Some local block(s) are obsolete and can be 
       // safely garbage-collected.
@@ -1430,9 +1430,9 @@ public class DataNode extends Configured
         out = new DataOutputStream(new BufferedOutputStream(baseStream, 
                                                             SMALL_BUFFER_SIZE));
 
-        LOG.info("Creating our own BlockSender");
+        LOG.info("DataTransfer: Creating our own BlockSender");
         blockSender = new BlockSender(b, 0, b.getNumBytes(), false, false, false, 
-            datanode, true); // @CPSC438
+            datanode); 
         DatanodeInfo srcNode = new DatanodeInfo(dnRegistration);
 
         //

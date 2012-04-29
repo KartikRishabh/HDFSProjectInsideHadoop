@@ -205,6 +205,8 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
       
       checksum.update(dataBuf, dataOff, chunkLen);
 
+/*
+    @CPSC438 STOP CHECKSUM
       if (!checksum.compare(checksumBuf, checksumOff)) {
         if (srcDataNode != null) {
           try {
@@ -221,7 +223,8 @@ class BlockReceiver implements java.io.Closeable, FSConstants {
         throw new IOException("Unexpected checksum mismatch " + 
                               "while writing " + block + " from " + inAddr);
       }
-
+*/
+    
       checksum.reset();
       dataOff += chunkLen;
       checksumOff += checksumSize;

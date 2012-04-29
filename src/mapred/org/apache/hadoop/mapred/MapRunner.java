@@ -20,11 +20,19 @@ package org.apache.hadoop.mapred;
 
 import java.io.IOException;
 
+// @CPSC438
+import org.apache.hadoop.hdfs.*;
+// @CPSC438
+import org.apache.commons.logging.*;
+
 import org.apache.hadoop.util.ReflectionUtils;
 
 /** Default {@link MapRunnable} implementation.*/
 public class MapRunner<K1, V1, K2, V2>
     implements MapRunnable<K1, V1, K2, V2> {
+    
+  // @CPSC438
+  public static final Log LOG = LogFactory.getLog(MapRunner.class);
   
   private Mapper<K1, V1, K2, V2> mapper;
   private boolean incrProcCount;
@@ -45,7 +53,11 @@ public class MapRunner<K1, V1, K2, V2>
       K1 key = input.createKey();
       V1 value = input.createValue();
       
+      // @CPSC438
+      LOG.info("We are running in MapRunner!");
+      
       while (input.next(key, value)) {
+        LOG.info(key + " <=> " + value); // @CPSC438
         // map pair to output
         mapper.map(key, value, output, reporter);
         if(incrProcCount) {

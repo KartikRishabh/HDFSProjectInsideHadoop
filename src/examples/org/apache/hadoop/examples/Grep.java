@@ -60,6 +60,9 @@ public class Grep extends Configured implements Tool {
 
       grepJob.setCombinerClass(LongSumReducer.class);
       grepJob.setReducerClass(LongSumReducer.class);
+      
+      // @CPSC438
+      grepJob.setInputFormat(TextInputFormat.class);
 
       FileOutputFormat.setOutputPath(grepJob, tempDir);
       grepJob.setOutputFormat(SequenceFileOutputFormat.class);

@@ -44,6 +44,9 @@ import org.apache.hadoop.util.NativeCodeLoader;
 import org.apache.hadoop.util.MergeSort;
 import org.apache.hadoop.util.PriorityQueue;
 
+// @CPSC438
+import org.apache.hadoop.hdfs.DFSUtil;
+
 /** 
  * <code>SequenceFile</code>s are flat files consisting of binary key/value 
  * pairs.
@@ -1492,7 +1495,10 @@ public class SequenceFile {
      */
     protected FSDataInputStream openFile(FileSystem fs, Path file,
         int bufferSize, long length) throws IOException {
+      // @CPSC438
       return fs.open(file, bufferSize);
+      //LOG.info("Opening a file as a SequenceFile");
+      //return DFSUtil.blockReduce(bufferSize, fs.open(file,bufferSize), 4, "above", "below");
     }
     
     /**

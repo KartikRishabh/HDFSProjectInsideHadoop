@@ -3627,10 +3627,12 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
         if (cursize == 0) {
           storedBlock.setNumBytes(block.getNumBytes());
         } else if (cursize != block.getNumBytes()) {
+            cursize = block.getNumBytes();
           LOG.warn("Inconsistent size for block " + block + 
                    " reported from " + node.getName() + 
                    " current size is " + cursize +
                    " reported size is " + block.getNumBytes());
+          // @CPSC438 Ignore block replica length differenes
           try {
             if (cursize > block.getNumBytes() && !blockUnderConstruction) {
               // new replica is smaller in size than existing block.

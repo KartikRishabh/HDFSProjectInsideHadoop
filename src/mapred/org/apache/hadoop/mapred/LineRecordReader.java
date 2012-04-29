@@ -32,6 +32,9 @@ import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+
+import org.apache.hadoop.hdfs.DFSUtil;
+
 /**
  * Treats keys as offset in file and value as line. 
  */
@@ -45,6 +48,9 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
   private long end;
   private LineReader in;
   int maxLineLength;
+
+	private LongWritable mKey;
+	private Text mValue;
 
   /**
    * A class that provides a line reader from an input stream.
@@ -75,7 +81,11 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
 
     // open the file and seek to the start of the split
     FileSystem fs = file.getFileSystem(job);
-    FSDataInputStream fileIn = fs.open(split.getPath());
+    
+    // @CPSC438
+    //FSDataInputStream fileIn = fs.open(split.getPath());
+    FSDataInputStream fileIn = fs.open(split.getPath());//DFSUtil.blockReduce(8192, fs.open(split.getPath()), 4, "above", "below");
+    
     boolean skipFirstLine = false;
     if (codec != null) {
       in = new LineReader(codec.createInputStream(fileIn), job);
@@ -93,11 +103,65 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
                            (int)Math.min((long)Integer.MAX_VALUE, end - start));
     }
     this.pos = start;
+		nextUntilStart(4, "above", "below");
   }
-  
+
+	/**
+	 * @CPSC438
+   */
+	public boolean nextUntilStart(int col, String startValue, String endValue) {
+		
+		/*key.set(pos);
+		if(value.toString().split(",")[3].compareTo("below") > 0) {
+			pos = end;
+			return false;
+		}*/
+		
+		LongWritable key = createKey();
+		Text value = createValue();
+		
+		try {
+			String[] splits;
+    	while (pos < end) {
+
+      	key.set(pos);
+
+      	int newSize = in.readLine(value, maxLineLength,
+                                Math.max((int)Math.min(Integer.MAX_VALUE, end-pos),
+                                         maxLineLength));
+			
+				LOG.info("Pre-Value: " + value);
+      	if (newSize == 0) {
+        	return false;
+     	 	}
+			
+				splits = value.toString().split(",");
+ 				if(splits[col-1].compareTo(endValue) > 0) {
+					pos = end;
+					return false;
+				}
+				if(splits[col-1].compareTo(startValue) >= 0) {
+					LOG.info("First next() value: " + value);
+					return true;
+				}
+	
+  	    pos += newSize;
+    	}
+    	return false;
+		} catch(Exception e) {
+			LOG.info(e.toString());
+			return false;
+		}
+  }
+
   public LineRecordReader(InputStream in, long offset, long endOffset,
                           int maxLineLength) {
     this.maxLineLength = maxLineLength;
+    /**
+     * @CPSC438
+     */
+    LOG.info("Constructor 1");
+    //this.in = new LineReader(DFSUtil.blockReduce(512, in, 4, "above", "below"));
     this.in = new LineReader(in);
     this.start = offset;
     this.pos = offset;
@@ -109,6 +173,11 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
     throws IOException{
     this.maxLineLength = job.getInt("mapred.linerecordreader.maxlength",
                                     Integer.MAX_VALUE);
+    /**
+     * @CPSC438
+     */
+    LOG.info("Constructor 2");
+    //this.in = new LineReader(DFSUtil.blockReduce(512, in, 4, "above", "below"), job);
     this.in = new LineReader(in, job);
     this.start = offset;
     this.pos = offset;
@@ -128,11 +197,21 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
     throws IOException {
 
     while (pos < end) {
+    
+      // @CPSC438
+      //String text = value.toString();
+      //text = text.substring( 
+
       key.set(pos);
 
       int newSize = in.readLine(value, maxLineLength,
                                 Math.max((int)Math.min(Integer.MAX_VALUE, end-pos),
                                          maxLineLength));
+
+			String[] splits = value.toString().split(",");
+			if(splits.length >= 3 && splits[3].compareTo("below") > 0)
+				return false;
+
       if (newSize == 0) {
         return false;
       }

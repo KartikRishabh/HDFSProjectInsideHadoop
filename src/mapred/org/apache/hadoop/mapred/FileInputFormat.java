@@ -43,6 +43,9 @@ import org.apache.hadoop.net.NodeBase;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 
+// @CPSC438
+import org.apache.hadoop.mapred.LineRecordReader;
+
 /** 
  * A base class for file-based {@link InputFormat}.
  * 
