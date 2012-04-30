@@ -575,7 +575,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       ) throws IOException {
     checkOpen();
     //    Get block info from namenode
-    LOG.info("Returning new DFSInputStream()");
+  //  LOG.info("Returning new DFSInputStream()");
     return new DFSInputStream(src, buffersize, verifyChecksum);
   }
 
@@ -707,8 +707,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                              ) throws IOException {
                              
     // @CPSC438 for the next one line(s)
-    LOG.info("DFSClient.create()");
-    LOG.info("\t\tsrc: " + src + "\n\t\t\t\treplication: " + replication);
+   // LOG.info("DFSClient.create()");
+   // LOG.info("\t\tsrc: " + src + "\n\t\t\t\treplication: " + replication);
         
     checkOpen();
     if (permission == null) {
@@ -1212,7 +1212,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       permission = FsPermission.getDefault();
     }
     FsPermission masked = permission.applyUMask(FsPermission.getUMask(conf));
-    LOG.info(src + ": masked=" + masked); // @CPSC438
+  //  LOG.info(src + ": masked=" + masked); // @CPSC438
     try {
       return namenode.mkdirs(src, masked);
     } catch(RemoteException re) {
@@ -1830,7 +1830,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
     
     DFSInputStream(String src, int buffersize, boolean verifyChecksum
                    ) throws IOException {
-      LOG.info(">>>>>>>>>>>>>Opening DFSInputStream");
+     // LOG.info(">>>>>>>>>>>>>Opening DFSInputStream");
       this.verifyChecksum = verifyChecksum;
       this.buffersize = buffersize;
       this.src = src;
@@ -2833,8 +2833,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
               // get new block from namenode.
               if (blockStream == null) {
-                LOG.info("(1/2) DFSOutputStream getting block from NameNode"); // @CPSC438
-                LOG.info("(2/2) Datastreamer for file: " + src + " block " + block);
+              //  LOG.info("(1/2) DFSOutputStream getting block from NameNode"); // @CPSC438
+             //   LOG.info("(2/2) Datastreamer for file: " + src + " block " + block);
                 nodes = nextBlockOutputStream(src); 
                 this.setName("DataStreamer for file " + src +
                              " block " + block);
@@ -2901,7 +2901,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                 }
               }
             }
-            LOG.info("Closing old block " + block); // @CPSC438
+          //  LOG.info("Closing old block " + block); // @CPSC438
             this.setName("DataStreamer for file " + src);
 
             response.close();        // ignore all errors in Response
@@ -2927,8 +2927,8 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
           // This is used by unit test to trigger race conditions.
           if (artificialSlowdown != 0 && clientRunning) {
-            LOG.info("Sleeping for artificial slowdown of " +
-                artificialSlowdown + "ms"); // @CPSC438
+        //    LOG.info("Sleeping for artificial slowdown of " +
+          //      artificialSlowdown + "ms"); // @CPSC438
             try { 
               Thread.sleep(artificialSlowdown); 
             } catch (InterruptedException e) {}
@@ -3227,7 +3227,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
       this.blockReplication = replication;
       this.progress = progress;
       if (progress != null) {
-        LOG.info("Set non-null progress callback on DFSOutputStream "+src); // @CPSC438
+       // LOG.info("Set non-null progress callback on DFSOutputStream "+src); // @CPSC438
       }
       
       if ( bytesPerChecksum < 1 || blockSize % bytesPerChecksum != 0) {
@@ -3262,7 +3262,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
                                        NSQuotaExceededException.class,
                                        DSQuotaExceededException.class);
       }
-      LOG.info("@CPSC: DFSOutputStream constructor (Namenode creates file)");
+      //LOG.info("@CPSC: DFSOutputStream constructor (Namenode creates file)");
       streamer.start();
     }
   
@@ -3427,7 +3427,7 @@ public class DFSClient implements FSConstants, java.io.Closeable {
 
       boolean result = false;
       try {
-          LOG.info(": Connecting to ]=> " + nodes[0].getName()); // @CPSC438
+       //   LOG.info(": Connecting to ]=> " + nodes[0].getName()); // @CPSC438
         InetSocketAddress target = NetUtils.createSocketAddr(nodes[0].getName());
         s = socketFactory.createSocket();
         timeoutValue = 3000 * nodes.length + socketTimeout;

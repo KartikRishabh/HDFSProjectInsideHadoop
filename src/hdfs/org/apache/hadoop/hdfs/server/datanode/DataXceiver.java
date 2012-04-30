@@ -463,10 +463,11 @@ class DataXceiver implements Runnable, FSConstants {
 //      //fname = localAddress + "/user/" + fname;//"dataset-micro.txt";
         if (block.getOpCode() != 1) {
           String fname = ((FSDataset)this.datanode.data).getBlockFile(block).getAbsolutePath();
-          DFSUtil.sortFile(fname, this.datanode.sortedCol);//getSortedCol());
-          LOG.info("[X] Sort Complete");
+          int sortCol = (block.getOpCode() == 2) ? 4 : this.datanode.sortedCol;
+          DFSUtil.sortFile(fname, sortCol);//getSortedCol());
+          //LOG.info("[X] Sort Complete");
         } else {
-          LOG.info("[ ] Sort Not Complete because of opCode");
+          //LOG.info("[ ] Sort Not Complete because of opCode");
         }
       
     } catch (IOException ioe) {

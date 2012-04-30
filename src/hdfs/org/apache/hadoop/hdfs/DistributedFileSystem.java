@@ -182,7 +182,7 @@ public class DistributedFileSystem extends FileSystem {
 
     statistics.incrementWriteOps(1);
     // @CPSC438
-    LOG.info("FSDataOutputStream.create()--" + f);
+   // LOG.info("FSDataOutputStream.create()--" + f);
     return new FSDataOutputStream
        (dfs.create(getPathName(f), permission,
                    overwrite, true, replication, blockSize, progress, bufferSize),

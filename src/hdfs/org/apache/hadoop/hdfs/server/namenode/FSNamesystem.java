@@ -966,6 +966,34 @@ public class FSNamesystem implements FSConstants, FSNamesystemMBean,
       dir.setTimes(src, inode, -1, now(), false);
     }
     Block[] blocks = inode.getBlocks();
+    
+    //@CPSC438
+    int blockLen = blocks.length;
+    ArrayList<Block> blockList = new ArrayList<Block>();
+    
+    for (int i = 0; i < blockLen; i++) {
+      Block curr = blocks[i];
+      //System.out.println("In FSNamesystem, current block opCode is " + curr.getOpCode());
+      if (curr.getOpCode() == 2) {
+        blockList.add(curr);
+      }
+    }
+    
+ //   blocks = blockList.toArray(new Block[blockList.size()]);
+    
+    /*
+    ArrayList<Block> blockAL = new ArrayList<Block>(Arrays.asList(blocks));
+    List list = Collections.synchronizedList(blockAL);
+    Iterator<Block> itr = list.iterator();
+    while (itr.hasNext()) {
+      Block curr = itr.next();
+      if (curr.getOpCode() != 2)
+        list.remove(curr);
+    }
+    blocks = (Block[])list.toArray(new Block[list.size()]);
+    */
+    
+    
     if (blocks == null) {
       return null;
     }

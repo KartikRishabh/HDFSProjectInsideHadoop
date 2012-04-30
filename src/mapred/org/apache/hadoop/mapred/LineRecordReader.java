@@ -103,19 +103,23 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
                            (int)Math.min((long)Integer.MAX_VALUE, end - start));
     }
     this.pos = start;
-		nextUntilStart(4, "above", "below");
+		nextUntilStart(3, "5000", "5099", true); // @CPSC438
   }
 
 	/**
 	 * @CPSC438
    */
-	public boolean nextUntilStart(int col, String startValue, String endValue) {
+	public boolean nextUntilStart(int col, String startValue, String endValue, boolean isInt) {
 		
 		/*key.set(pos);
 		if(value.toString().split(",")[3].compareTo("below") > 0) {
 			pos = end;
 			return false;
 		}*/
+		
+		long lstart = Long.parseLong(startValue);
+		long lend = Long.parseLong(endValue);
+		long target;
 		
 		LongWritable key = createKey();
 		Text value = createValue();
@@ -130,20 +134,31 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
                                 Math.max((int)Math.min(Integer.MAX_VALUE, end-pos),
                                          maxLineLength));
 			
-				LOG.info("Pre-Value: " + value);
+			  // @CPSC438
       	if (newSize == 0) {
         	return false;
      	 	}
 			
 				splits = value.toString().split(",");
- 				if(splits[col-1].compareTo(endValue) > 0) {
+				if (splits.length >= 3) {
+				  target = Long.parseLong(splits[col-1]);
+				  if (target > lend) {
+				    pos = end;
+				    return false;
+				  }
+				  if (target >= lstart) {
+				    LOG.info("First next() value: " + value);
+				    return true;
+				  }
+				}
+ 				/*if(splits[col-1].compareTo(endValue) > 0) {
 					pos = end;
 					return false;
 				}
 				if(splits[col-1].compareTo(startValue) >= 0) {
-					LOG.info("First next() value: " + value);
+					//LOG.info("First next() value: " + value);
 					return true;
-				}
+				}*/
 	
   	    pos += newSize;
     	}
@@ -160,7 +175,7 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
     /**
      * @CPSC438
      */
-    LOG.info("Constructor 1");
+    //LOG.info("Constructor 1");
     //this.in = new LineReader(DFSUtil.blockReduce(512, in, 4, "above", "below"));
     this.in = new LineReader(in);
     this.start = offset;
@@ -176,7 +191,7 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
     /**
      * @CPSC438
      */
-    LOG.info("Constructor 2");
+  //  LOG.info("Constructor 2");
     //this.in = new LineReader(DFSUtil.blockReduce(512, in, 4, "above", "below"), job);
     this.in = new LineReader(in, job);
     this.start = offset;
@@ -209,8 +224,12 @@ public class LineRecordReader implements RecordReader<LongWritable, Text> {
                                          maxLineLength));
 
 			String[] splits = value.toString().split(",");
-			if(splits.length >= 3 && splits[3].compareTo("below") > 0)
-				return false;
+			long target;
+			if(splits.length > 2) { 
+			  target = Long.parseLong(splits[2]);
+			  if (target > 5099)
+			    return false;
+		  }
 
       if (newSize == 0) {
         return false;

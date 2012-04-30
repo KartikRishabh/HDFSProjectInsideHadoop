@@ -166,11 +166,9 @@ public class DFSUtil {
   public static void sortFile(String filename, int column) {
 
     LOG.info("Filename: " + filename + " | S Column: " + column);
-    column = 4;
-  
-		if(true)
-			return ;
-		
+    
+    column = 3;
+ 
     try {
 		  Process pr = null;
 		  String runCommand = DFSUtil.EXTERNAL_SORT + " " + filename + " " + 
@@ -218,10 +216,10 @@ public class DFSUtil {
 			   	pr.waitFor();
 			   break;
 		  }
-		  LOG.info("Really, trully, did finish sorting");
+	//	  LOG.info("Really, trully, did finish sorting");
 		}
 		catch(Exception e) {
-		  LOG.info("What the hell is going on!");
+	//	  LOG.info("What the hell is going on!");
 		  e.printStackTrace();
 		}
 	}
@@ -241,7 +239,7 @@ public class DFSUtil {
 	  if (splits.length >= col) {
 	    target = splits[col-1];
 	    if (target.compareTo(startValue) < 0) {
-	      LOG.info(lines);
+	  //    LOG.info(lines);
         lines.clear();  
 				in.mark(8192);
 	      return true;
@@ -260,14 +258,14 @@ public class DFSUtil {
 	        target.compareTo(endValue) <= 0) {
 				if(COUNT == 0) {
 					in.mark(8192);
-					LOG.info("The first valid line is: " + line);
+			//		LOG.info("The first valid line is: " + line);
 	      }
 				out.println(line);
 				COUNT++;
 	      continue;
 	    }
 	    if (target.compareTo(endValue) > 0) {
-				LOG.info("The first invalid line is: " + line);
+			//	LOG.info("The first invalid line is: " + line);
         lines.clear();
 				in.reset();
 	      return false;
@@ -284,12 +282,12 @@ public class DFSUtil {
 	public static FSDataInputStream blockReduce(int bufferSize, FSDataInputStream is, int col, 
                                                String startValue, String endValue) {      
 		
-		LOG.info("Block Reduce");														          
+		//LOG.info("Block Reduce");														          
     
     try {  
       File outFile = new File(System.currentTimeMillis() + "_" + col + (int)(10000*Math.random()));
       Path outPath = new Path(outFile.toURI());
-      LOG.info("OUTFILE: " + outFile.getAbsolutePath());
+   //   LOG.info("OUTFILE: " + outFile.getAbsolutePath());
 		
 		  ColDataType cdt = ColDataType.INTEGER;
       
@@ -388,7 +386,7 @@ public class DFSUtil {
       //in.close();
 		//  out.close();
       
-		  LOG.info("Really, truly did reduce blocks");
+		 // LOG.info("Really, truly did reduce blocks");
 		  out.close();
 			COUNT=0;
 		  return is;//outFile.toURL().openStream();

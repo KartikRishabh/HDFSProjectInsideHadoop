@@ -296,7 +296,7 @@ public class DataNode extends Configured
     
     // @CPSC438
     this.sortedCol = (int)(1 + Math.random() * 4);
-    LOG.info("Setting my sorted column to: " + this.sortedCol);
+    //LOG.info("Setting my sorted column to: " + this.sortedCol);
       
     SecurityUtil.login(conf, DFSConfigKeys.DFS_DATANODE_KEYTAB_FILE_KEY, 
         DFSConfigKeys.DFS_DATANODE_USER_NAME_KEY);

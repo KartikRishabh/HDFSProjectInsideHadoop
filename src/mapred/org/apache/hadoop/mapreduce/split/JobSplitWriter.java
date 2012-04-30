@@ -82,7 +82,7 @@ public class JobSplitWriter {
       Configuration conf, FileSystem   fs, 
       org.apache.hadoop.mapred.InputSplit[] splits) 
   throws IOException {
-    LOG.info("createSplitFiles: About to split some files...");
+ //   LOG.info("createSplitFiles: About to split some files...");
     FSDataOutputStream out = createFile(fs, 
         JobSubmissionFiles.getJobSplitFile(jobSubmitDir), conf);
     SplitMetaInfo[] info = writeOldSplits(splits, out, conf);

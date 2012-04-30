@@ -174,7 +174,7 @@ class LocalJobRunner implements JobSubmissionProtocol {
     @SuppressWarnings("unchecked")
     @Override
     public void run() {
-      LOG.info("LocalJobRunner is locally running jobs.");// @CPSC438;
+     // LOG.info("LocalJobRunner is locally running jobs.");// @CPSC438;
       JobID jobId = profile.getJobID();
       JobContext jContext = new JobContext(conf, jobId);
       OutputCommitter outputCommitter = job.getOutputCommitter();
@@ -218,7 +218,7 @@ class LocalJobRunner implements JobSubmissionProtocol {
             queueMetrics.launchMap(mapId);
             
             // @CPSC438
-            LOG.info("About to call map.run()");
+          //  LOG.info("About to call map.run()");
             try {
               Thread.sleep(2000);
             } catch (Exception e) {
